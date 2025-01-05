@@ -1,3 +1,5 @@
+import Footer from "../_components/Footer";
+import Navbar from "../_components/Navbar";
 import CarrierPage from "./_components/carrier";
 
 // array de fornecedores para depuracao
@@ -50,11 +52,13 @@ const transportadora = {
 const Carrier = () => {
   return (
     <div>
+      <Navbar />
       <CarrierPage
         fornecedores={fornecedores}
         clientes={clientes}
         transportadora={transportadora}
       />
+      <Footer />
     </div>
   );
 };

@@ -70,7 +70,7 @@ const CarrierPage = ({ fornecedores, clientes, transportadora }) => {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-6xl">
+      <Card className="w-full max-w-4xl">
         <CardHeader className="space-y-2">
           <CardTitle className="text-center text-2xl font-bold">
             Cadastro de Transportadora
@@ -82,7 +82,7 @@ const CarrierPage = ({ fornecedores, clientes, transportadora }) => {
 
         <CardContent>
           <form className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="md:grid flex flex-col gap-6 md:grid-cols-2">
               {/* Informações de Transportadora */}
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -192,7 +192,7 @@ const CarrierPage = ({ fornecedores, clientes, transportadora }) => {
             </div>
 
             {/* Botões */}
-            <div className="mt-6 flex justify-end space-x-4">
+            <div className="mt-6 flex flex-col sm:flex-row justify-end space-x-0 sm:space-x-4 space-y-4 sm:space-y-0">
               <Button variant="outline" type="button">
                 Cancelar
               </Button>
