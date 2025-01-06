@@ -24,6 +24,8 @@ import {
   TooltipTrigger,
 } from "@/app/_components/ui/tooltip";
 import Image from "next/image";
+import { createRegistration } from "@/app/_lib/actions";
+import { useToast } from "@/app/_hooks/use-toast";
 
 // Configurações para diferentes tipos de formulários
 const formConfigs = {
@@ -58,12 +60,13 @@ const formConfigs = {
         { id: "endereco", label: "Endereço", type: "text" },
         { id: "telFixo", label: "Tel Fixo", type: "text" },
         { id: "emailPedido", label: "Email Pedido", type: "email" },
+        { id: "ie", label: "I.E.", type: "text" },
       ],
       rightColumn: [
-        { id: "ie", label: "I.E.", type: "text" },
         { id: "cep", label: "CEP", type: "text" },
         { id: "celular", label: "Celular", type: "text" },
-        { id: "comissao", label: "Comissão", type: "number" },
+        { id: "emailFin", label: "Email Final", type: "email" },
+        { id: "comissao", label: "Comissão", type: "number", step: "0.01" },
         { id: "dataRecebimento", label: "Data de Recebimento", type: "date" },
       ],
     },
@@ -72,13 +75,55 @@ const formConfigs = {
 
 const RegistrationForm = ({ onSubmit, initialData = {} }) => {
   const [formType, setFormType] = useState("cliente");
+  const { toast } = useToast();
   const config = formConfigs[formType];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    onSubmit({ type: formType, ...data });
+
+    // Validação básica no cliente
+    const requiredFields = [
+      "codigo",
+      "fornecedor",
+      "cnpj",
+      "endereco",
+      "ie",
+      "cep",
+      "celular",
+      "emailFin",
+    ];
+
+    const emptyFields = requiredFields.filter((field) => !data[field]);
+
+    if (emptyFields.length > 0) {
+      toast({
+        title: "Erro de validação",
+        description: `Os seguintes campos são obrigatórios: ${emptyFields.join(
+          ", "
+        )}`,
+        duration: 4000,
+      });
+      return;
+    }
+
+    try {
+      await createRegistration({ type: formType, ...data });
+      e.target.reset();
+      toast({
+        title: "Sucesso",
+        description: "Cadastro realizado com sucesso",
+        duration: 2000,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao realizar cadastro",
+        duration: 4000,
+      });
+      console.error("Error submitting form:", error);
+    }
   };
 
   return (
@@ -151,6 +196,8 @@ const RegistrationForm = ({ onSubmit, initialData = {} }) => {
                       id={field.id}
                       name={field.id}
                       type={field.type}
+                      required={field.required}
+                      step={field.step}
                       defaultValue={initialData[field.id] || ""}
                     />
                   </div>
@@ -166,6 +213,8 @@ const RegistrationForm = ({ onSubmit, initialData = {} }) => {
                       id={field.id}
                       name={field.id}
                       type={field.type}
+                      required={field.required}
+                      step={field.step}
                       defaultValue={initialData[field.id] || ""}
                     />
                   </div>

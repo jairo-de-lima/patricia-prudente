@@ -8,52 +8,58 @@ datasource db {
 }
 
 model Cliente {
-  id            String   @id @default(uuid())
-  codigo        String   @unique
-  cliente       String
-  cnpj          String   @unique
-  endereco      String
-  telefoneFixo  String?
-  celular       String?
-  email         String
-  suframa       String?
-  transportadora String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  transportadoras Transportadora[]
-}
-
-model Fornecedor {
   id             String   @id @default(uuid())
   codigo         String   @unique
-  fornecedor     String
+  cliente        String
   cnpj           String   @unique
   endereco       String
+  cep             String
+  emailFin        String
   telefoneFixo   String?
   celular        String?
-  emailPedido    String
-  comissao       Float?
-  dataRecebimento DateTime?
+  email          String
+  inscEstad      String
+  suframa        String?
+  transportadora String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   transportadoras Transportadora[]
 }
 
-model Transportadora {
-  id              String     @id @default(uuid())
-  numeroNF        String
-  descricao       String
-  quantidade      Int
-  unidade         String
-  dataSaida       DateTime
-  codigo          String
-  valorTotal      Float
-  nome            String
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+model Fornecedor {
+  id              String    @id @default(uuid())
+  codigo          String    @unique
+  fornecedor      String
+  cnpj            String    @unique
+  endereco        String
+  telefoneFixo    String?
+  cep             String
+  emailFin        String
+  celular         String?
+  emailPedido     String
+   inscEstad      String
+  comissao        Float?
+  dataRecebimento DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  clientes        Cliente[]
-  fornecedores    Fornecedor[]
+  transportadoras Transportadora[]
+}
+
+model Transportadora {
+  id         String   @id @default(uuid())
+  numeroNF   String?
+  descricao  String?
+  quantidade Int?
+  unidade    String?
+  dataSaida  DateTime?
+  codigo     String?
+  valorTotal Float?
+  nome       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  clientes     Cliente[]
+  fornecedores Fornecedor[]
 }

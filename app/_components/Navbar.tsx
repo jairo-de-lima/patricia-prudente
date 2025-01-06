@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+
 import {
   Menubar,
   MenubarItem,
@@ -12,8 +12,6 @@ import {
 import Image from "next/image";
 
 const Navbar = () => {
-  const [open, setOpen] = useState(false);
-
   return (
     <nav className="bg-primary text-white shadow-md">
       <div className="max-w-screen-xl mx-auto px-4 py-2 flex justify-between items-center">
@@ -39,7 +37,7 @@ const Navbar = () => {
         </div>
 
         <div className="md:hidden">
-          <Menubar open={open} onOpenChange={setOpen}>
+          <Menubar>
             <MenubarMenu>
               <MenubarTrigger className=" p-2 rounded-md">☰</MenubarTrigger>
               <MenubarContent>
