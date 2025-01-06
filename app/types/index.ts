@@ -34,13 +34,12 @@ export interface Transportadora {
   id: string;
   codigo: string;
   transportadora: string;
-  numeroNF?: String;
-  descricao?: String;
-  cnpj: string;
-  endereco: string;
-  telFixo?: string;
-  unidade?: string;
-  dataSaida?: string;
-  valortotal?: string;
-  nome: string;
+  numeroNF: string;
+  descricao?: string;
+  quantidade?: number;
+  valorUn?: number;
+  valorTotal?: number;
+  dataSaida?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

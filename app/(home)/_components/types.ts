@@ -3,7 +3,7 @@ type FieldConfig = {
   label: string;
   type: string;
   step?: string;
-  required?: boolean; // Novo campo para controlar se é obrigatório
+  required?: boolean;
 };
 
 type FormConfig = {

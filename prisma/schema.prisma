@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // Substitua pelo banco de dados que você está usando
+  provider = "postgresql" 
   url      = env("DATABASE_URL")
 }
 
@@ -13,8 +13,8 @@ model Cliente {
   cliente        String
   cnpj           String   @unique
   endereco       String
-  cep             String
-  emailFin        String
+  cep            String
+  emailFin       String
   telefoneFixo   String?
   celular        String?
   email          String
@@ -38,7 +38,7 @@ model Fornecedor {
   emailFin        String
   celular         String?
   emailPedido     String
-   inscEstad      String
+  inscEstad       String
   comissao        Float?
   dataRecebimento DateTime?
   createdAt       DateTime  @default(now())
@@ -48,18 +48,21 @@ model Fornecedor {
 }
 
 model Transportadora {
-  id         String   @id @default(uuid())
-  numeroNF   String?
-  descricao  String?
-  quantidade Int?
-  unidade    String?
-  dataSaida  DateTime?
-  codigo     String?
-  valorTotal Float?
-  nome       String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             String      @id @default(uuid())
+  codigo         String      @unique
+  transportadora String
+  numeroNF       String
+  descricao      String?
+  quantidade     Int
+  valorUn        Float
+  valorTotal     Float
+  dataSaida      DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  Cliente        Cliente?    @relation(fields: [clienteId], references: [id])
+  clienteId      String?
+  Fornecedor     Fornecedor? @relation(fields: [fornecedorId], references: [id])
+  fornecedorId   String?
 
-  clientes     Cliente[]
-  fornecedores Fornecedor[]
+  @@map("transportadoras")
 }

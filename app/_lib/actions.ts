@@ -3,6 +3,20 @@
 import prisma from "../api/database";
 import { revalidatePath } from "next/cache";
 
+function validateTransportadoraData(data: any) {
+  const errors: string[] = [];
+
+  const requiredFields = ["codigo", "transportadora", "NumeroNF"];
+
+  requiredFields.forEach((field) => {
+    if (!data[field] || String(data[field]).trim() === "") {
+      errors.push(`O campo ${field} é obrigatório`);
+    }
+  });
+
+  return errors;
+}
+
 function validateFornecedorData(data: any) {
   const errors = [];
 
@@ -47,50 +61,76 @@ function validateFornecedorData(data: any) {
 
 export async function createRegistration(data: any) {
   try {
-    if (data.type === "cliente") {
-      await prisma.cliente.create({
-        data: {
-          codigo: data.codigo,
-          cliente: data.cliente,
-          cnpj: data.cnpj,
-          endereco: data.end,
-          telefoneFixo: data.telFixo,
-          email: data.email,
-          suframa: data.suframa,
-          transportadora: data.transportadora,
-          inscEstad: data.ie,
-          cep: data.cep,
-          celular: data.cel,
-          emailFin: data.emailFinan,
-        },
-      });
-    } else {
-      // Valida os dados antes de prosseguir
-      const validationErrors = validateFornecedorData(data);
+    switch (data.type) {
+      case "cliente":
+        await prisma.cliente.create({
+          data: {
+            codigo: data.codigo,
+            cliente: data.cliente,
+            cnpj: data.cnpj,
+            endereco: data.end,
+            telefoneFixo: data.telFixo || null,
+            email: data.email,
+            suframa: data.suframa || null,
+            transportadora: data.transportadora || null,
+            inscEstad: data.ie,
+            cep: data.cep,
+            celular: data.cel,
+            emailFin: data.emailFinan,
+          },
+        });
+        break;
 
-      if (validationErrors.length > 0) {
-        throw new Error(validationErrors.join("\n"));
-      }
+      case "fornecedor":
+        const validationErrors = validateFornecedorData(data);
+        if (validationErrors.length > 0) {
+          throw new Error(validationErrors.join("\n"));
+        }
 
-      const fornecedorData = {
-        codigo: data.codigo,
-        fornecedor: data.fornecedor,
-        cnpj: data.cnpj,
-        endereco: data.endereco,
-        telefoneFixo: data.telefoneFixo,
-        emailPedido: data.emailPedido,
-        inscEstad: data.ie,
-        cep: data.cep,
-        celular: data.celular,
-        emailFin: data.emailFin,
-        comissao: parseFloat(data.comissao || "0"),
-        dataRecebimento: new Date(data.dataRecebimento || null),
-      };
+        await prisma.fornecedor.create({
+          data: {
+            codigo: data.codigo,
+            fornecedor: data.fornecedor,
+            cnpj: data.cnpj,
+            endereco: data.endereco,
+            telefoneFixo: data.telefoneFixo || null,
+            emailPedido: data.emailPedido || null,
+            inscEstad: data.ie,
+            cep: data.cep,
+            celular: data.celular,
+            emailFin: data.emailFin,
+            comissao: data.comissao ? parseFloat(data.comissao) : null,
+            dataRecebimento: data.dataRecebimento
+              ? new Date(data.dataRecebimento)
+              : null,
+          },
+        });
+        break;
 
-      await prisma.fornecedor.create({
-        data: fornecedorData,
-      });
+      case "transportadora":
+        const transportadoraErrors = validateTransportadoraData(data);
+        if (transportadoraErrors.length > 0) {
+          throw new Error(transportadoraErrors.join("\n"));
+        }
+
+        await prisma.transportadora.create({
+          data: {
+            codigo: data.codigo,
+            transportadora: data.transportadora,
+            numeroNF: data.NumeroNF,
+            descricao: data.descricao || null,
+            quantidade: data.quantidade ? parseInt(data.quantidade) : 0,
+            valorUn: data.ValorUn ? parseFloat(data.ValorUn) : 0,
+            valorTotal: data.ValorTotal ? parseFloat(data.ValorTotal) : 0,
+            dataSaida: data.DataSaida ? new Date(data.DataSaida) : null,
+          },
+        });
+        break;
+
+      default:
+        throw new Error("Tipo de registro inválido");
     }
+
     revalidatePath("/");
   } catch (error: any) {
     console.error("Error creating registration:", error);
