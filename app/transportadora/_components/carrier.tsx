@@ -21,6 +21,7 @@ import {
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
+import Image from "next/image";
 
 const CarrierPage = ({ fornecedores, clientes, transportadora }) => {
   const [nomeTransportadora, setNomeTransportadora] = useState("");
@@ -72,6 +73,13 @@ const CarrierPage = ({ fornecedores, clientes, transportadora }) => {
     <div className="flex min-h-screen w-full items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-4xl">
         <CardHeader className="space-y-2">
+          <Image
+            src="/logo.svg"
+            alt="logo"
+            width={80}
+            height={50}
+            className="rounded-md"
+          />
           <CardTitle className="text-center text-2xl font-bold">
             Cadastro de Transportadora
           </CardTitle>

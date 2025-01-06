@@ -23,6 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/app/_components/ui/tooltip";
+import Image from "next/image";
 
 // Configurações para diferentes tipos de formulários
 const formConfigs = {
@@ -85,7 +86,13 @@ const RegistrationForm = ({ onSubmit, initialData = {} }) => {
       <Card className="w-full max-w-6xl">
         <CardHeader className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">P/P logo</span>
+            <Image
+              src="/logo.svg"
+              alt="logo"
+              width={80}
+              height={50}
+              className="rounded-md"
+            />
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

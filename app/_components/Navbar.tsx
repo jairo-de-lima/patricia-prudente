@@ -9,6 +9,7 @@ import {
   MenubarTrigger,
   MenubarContent,
 } from "./ui/menubar";
+import Image from "next/image";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -17,7 +18,13 @@ const Navbar = () => {
     <nav className="bg-primary text-white shadow-md">
       <div className="max-w-screen-xl mx-auto px-4 py-2 flex justify-between items-center">
         <Link href="/" className="text-xl font-semibold">
-          Gestor de Clientes
+          <Image
+            src="/logo.svg"
+            alt="logo"
+            width={50}
+            height={20}
+            className="rounded-md "
+          />
         </Link>
         <div className="hidden md:flex gap-6">
           <Link href="/" className="hover:text-gray-300">

@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import React, { useState } from "react";
+import Image from "next/image";
 
 const FilterPage = ({ fornecedores, clientes, transportadoras }) => {
   const [tipoFiltro, setTipoFiltro] = useState("transportadora");
@@ -59,7 +60,16 @@ const FilterPage = ({ fornecedores, clientes, transportadoras }) => {
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <Card className="md:w-[60%] w-full h-full ">
         <CardHeader>
-          <CardTitle>Filtro de Dados</CardTitle>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/logo.svg"
+              alt="logo"
+              width={80}
+              height={50}
+              className="rounded-md"
+            />
+            <CardTitle>Filtro de Dados</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4 flex flex-col items-center">
