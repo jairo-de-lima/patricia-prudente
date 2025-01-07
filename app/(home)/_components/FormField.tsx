@@ -7,16 +7,34 @@ type FormFieldProps = {
 };
 
 const FormField = ({ field, defaultValue = "" }: FormFieldProps) => (
-  <div className="space-y-2">
-    <Label htmlFor={field.id}>{field.label}:</Label>
-    <Input
-      id={field.id}
-      name={field.id}
-      type={field.type}
-      required={field.required}
-      step={field.step}
-      defaultValue={defaultValue}
-    />
+  <div className="flex items-center gap-2">
+    <Label htmlFor={field.id} className="min-w-[100px] text-purple-800">
+      {field.label}:
+    </Label>
+    <div className="flex-1">
+      {field.prefix ? (
+        <div className="flex items-center">
+          <span className="mr-1 text-sm text-gray-500">{field.prefix}</span>
+          <Input
+            id={field.id}
+            name={field.id}
+            type={field.type}
+            required={field.required}
+            defaultValue={field.value || defaultValue}
+            className="flex-1"
+          />
+        </div>
+      ) : (
+        <Input
+          id={field.id}
+          name={field.id}
+          type={field.type}
+          required={field.required}
+          defaultValue={field.value || defaultValue}
+          className="flex-1"
+        />
+      )}
+    </div>
   </div>
 );
 

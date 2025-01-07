@@ -3,60 +3,79 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" 
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Cliente {
   id             String   @id @default(uuid())
+  dataCad        DateTime @default(now())
   codigo         String   @unique
-  cliente        String
+  razaoSocial    String
   cnpj           String   @unique
+  ie             String   // Inscrição Estadual
   endereco       String
+  numero         String
   cep            String
-  emailFin       String
+  cidade         String
+  estado         String
   telefoneFixo   String?
   celular        String?
   email          String
-  inscEstad      String
-  suframa        String?
-  transportadora String?
+  emailFina      String
+  suframa        String?  @default("200405500")
+  transpMetralon String?  // Campo Transp. Metrafon
+  tel            String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   transportadoras Transportadora[]
+
+  @@map("clientes")
 }
 
 model Fornecedor {
-  id              String    @id @default(uuid())
-  codigo          String    @unique
-  fornecedor      String
-  cnpj            String    @unique
+  id              String   @id @default(uuid())
+  dataCad         DateTime @default(now())
+  codigo          String   @unique
+  razaoSocial     String
+  cnpj            String   @unique
+  ie              String   // Inscrição Estadual
   endereco        String
-  telefoneFixo    String?
+  endNumero          String
   cep             String
-  emailFin        String
+  telefoneFixo    String?
   celular         String?
   emailPedido     String
-  inscEstad       String
-  comissao        Float?
-  dataRecebimento DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  emailFin       String
+  comissao        String?  @default("2%")
+  dataRecebimento String?  @default("20")
+  obs             String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   transportadoras Transportadora[]
+
+  @@map("fornecedores")
 }
 
 model Transportadora {
   id             String      @id @default(uuid())
+  dataCad        DateTime    @default(now())
   codigo         String      @unique
-  transportadora String
-  numeroNF       String
-  descricao      String?
-  quantidade     Int
-  valorUn        Float
-  valorTotal     Float
-  dataSaida      DateTime?
+  razaoSocial    String
+  cnpj           String      @unique
+  ie             String      // Inscrição Estadual
+  endereco       String
+  numero         String
+  cep            String
+  cidade         String
+  estado         String
+  telefoneFixo   String?
+  celular        String?
+  email          String
+  emailFina      String
+  obs            String?     @db.Text
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   Cliente        Cliente?    @relation(fields: [clienteId], references: [id])

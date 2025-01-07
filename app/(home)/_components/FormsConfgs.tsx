@@ -1,112 +1,194 @@
 export const formConfigs = {
   cliente: {
-    title: "Cadastro de Clientes",
-    codLabel: "Cod. Cliente",
+    title: "Cadastro de Cliente",
+    dataCad: true,
     fields: {
       leftColumn: [
-        { id: "cliente", label: "Cliente", type: "text", required: true },
-        { id: "cnpj", label: "CNPJ", type: "text", required: true },
-        { id: "end", label: "End", type: "text", required: true },
-        { id: "telFixo", label: "Tel Fixo", type: "text", required: false },
-        { id: "email", label: "Email", type: "email", required: false },
-        { id: "suframa", label: "Suframa", type: "text", required: false },
         {
-          id: "transportadora",
-          label: "Transportadora",
+          id: "razaoSocial",
+          label: "Razão Social",
           type: "text",
-          required: false,
-        },
-      ],
-      rightColumn: [
-        { id: "ie", label: "I.E.", type: "text", required: true },
-        { id: "cep", label: "CEP", type: "text", required: true },
-        { id: "cel", label: "Cel", type: "text", required: true },
-        {
-          id: "emailFinan",
-          label: "Email Final",
-          type: "email",
           required: true,
         },
+        { id: "cnpj", label: "CNPJ", type: "text", required: true },
+        { id: "ie", label: "IE", type: "text", required: true },
+        {
+          id: "endereco",
+          isRow: true,
+          fields: [
+            { id: "end", label: "END", type: "text", required: true },
+            { id: "numero", label: "Nº", type: "text", required: true },
+            { id: "cep", label: "Cep", type: "text", required: true },
+          ],
+        },
+        {
+          id: "localizacao",
+          isRow: true,
+          fields: [
+            { id: "cidade", label: "CIDADE", type: "text", required: true },
+            { id: "estado", label: "ESTADO", type: "text", required: true },
+          ],
+        },
+        {
+          id: "telefones",
+          isRow: true,
+          fields: [
+            {
+              id: "telFixo",
+              label: "Tel Fixo",
+              type: "tel",
+              required: true,
+              prefix: "(11)",
+            },
+            {
+              id: "telCel",
+              label: "Tel Cel",
+              type: "tel",
+              required: true,
+              prefix: "(11)",
+            },
+          ],
+        },
+        {
+          id: " E-mails",
+          isRow: true,
+          fields: [
+            { id: "email", label: "Email", type: "email", required: true },
+            {
+              id: "emailFina",
+              label: "Email Financeiro",
+              type: "email",
+              required: true,
+            },
+          ],
+        },
+
+        { id: "suframa", label: "Suframa", type: "text", require: false },
+        { id: "Transportadora", label: "Transportadora", type: "text" },
+        { id: "tel", label: "Telefone", type: "tel", prefix: "(11)" },
       ],
     },
   },
+
   fornecedor: {
-    title: "Cadastro de Fornecedores",
-    codLabel: "Cod. Fornecedor",
+    title: "Cadastro de Fornecedor",
+    dataCad: true,
+    codLabel: "Código do fornecedor",
     fields: {
       leftColumn: [
-        { id: "fornecedor", label: "Fornecedor", type: "text", required: true },
+        {
+          id: "razaoSocial",
+          label: "Razão Social",
+          type: "text",
+          required: true,
+        },
         { id: "cnpj", label: "CNPJ", type: "text", required: true },
-        { id: "endereco", label: "Endereço", type: "text", required: true },
-        { id: "telFixo", label: "Tel Fixo", type: "text", required: false },
+        { id: "ie", label: "IE", type: "text", required: true },
+        {
+          id: "endereco",
+          isRow: true,
+          fields: [
+            { id: "end", label: "END", type: "text", required: true },
+            { id: "numero", label: "Nº", type: "text", required: true },
+            { id: "cep", label: "Cep", type: "text", required: true },
+          ],
+        },
+        {
+          id: "telefones",
+          isRow: true,
+          fields: [
+            {
+              id: "telFixo",
+              label: "Tel Fixo",
+              type: "tel",
+              required: true,
+              prefix: "(11)",
+            },
+            {
+              id: "telCel",
+              label: "Tel Cel",
+              type: "tel",
+              required: true,
+              prefix: "(11)",
+            },
+          ],
+        },
         {
           id: "emailPedido",
           label: "Email Pedido",
           type: "email",
-          required: false,
-        },
-        { id: "ie", label: "I.E.", type: "text", required: false },
-      ],
-      rightColumn: [
-        { id: "cep", label: "CEP", type: "text", required: true },
-        { id: "celular", label: "Celular", type: "text", required: true },
-        {
-          id: "emailFin",
-          label: "Email Final",
-          type: "email",
           required: true,
         },
-        {
-          id: "comissao",
-          label: "Comissão",
-          type: "number",
-          step: "0.01",
-          required: false,
-        },
-        {
-          id: "dataRecebimento",
-          label: "Data de Recebimento",
-          type: "date",
-          required: false,
-        },
+        { id: "emailFina", label: "Email Fina", type: "email", required: true },
       ],
+      extras: {
+        comissao: "2%",
+        dataRecebimento: "20",
+      },
+      obs: true,
     },
   },
+
   transportadora: {
-    title: "Cadastro de Transportadoras",
-    codLabel: "Cod. Transportadora",
+    title: "Cadastro de Transportadora",
+    dataCad: true,
+    codLabel: "Código da Transp",
     fields: {
       leftColumn: [
         {
-          id: "transportadora",
-          label: "Transportadora",
+          id: "razaoSocial",
+          label: "Razão Social",
           type: "text",
           required: true,
         },
-        { id: "NumeroNF", label: "Numero da NF", type: "text", required: true },
-        { id: "descricao", label: "Descrição", type: "text", required: false },
+        { id: "cnpj", label: "CNPJ", type: "text", required: true },
+        { id: "ie", label: "IE", type: "text", required: true },
         {
-          id: "quantidade",
-          label: "Quantidade",
-          type: "number",
-          required: false,
+          id: "endereco",
+          isRow: true,
+          fields: [
+            { id: "end", label: "END", type: "text", required: true },
+            { id: "numero", label: "Nº", type: "text", required: true },
+            { id: "cep", label: "Cep", type: "text", required: true },
+          ],
+        },
+        {
+          id: "localizacao",
+          isRow: true,
+          fields: [
+            { id: "cidade", label: "CIDADE", type: "text", required: true },
+            { id: "estado", label: "ESTADO", type: "text", required: true },
+          ],
+        },
+        {
+          id: "telefones",
+          isRow: true,
+          fields: [
+            {
+              id: "telFixo",
+              label: "Tel Fixo",
+              type: "tel",
+              required: true,
+              prefix: "(11)",
+            },
+            {
+              id: "telCel",
+              label: "Tel Cel",
+              type: "tel",
+              required: true,
+              prefix: "(11)",
+            },
+          ],
+        },
+        { id: "email", label: "Email", type: "email", required: true },
+        {
+          id: "emailFina",
+          label: "Email Financeiro",
+          type: "email",
+          required: true,
         },
       ],
-      rightColumn: [
-        { id: "ValorUn", label: "Unidades", type: "number", required: false },
-        {
-          id: "ValorTotal",
-          label: "Valor Total",
-          type: "number",
-          required: false,
-        },
-        {
-          id: "DataSaida",
-          label: "Data de Saida",
-          type: "date",
-          required: false,
-        },
-      ],
+      obs: true,
     },
   },
 };
