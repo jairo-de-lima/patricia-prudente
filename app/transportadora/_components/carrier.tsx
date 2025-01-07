@@ -1,221 +1,427 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
+import { jsPDF } from "jspdf";
+import { format } from "date-fns";
+import { Button } from "@/app/_components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/app/_components/ui/card";
-import { Label } from "@/app/_components/ui/label";
-import { Input } from "@/app/_components/ui/input";
-import { Button } from "@/app/_components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/_components/ui/select";
 
-import { saveAs } from "file-saver";
-import * as XLSX from "xlsx";
-import { jsPDF } from "jspdf";
-import Image from "next/image";
+interface Cliente {
+  id: string;
+  codigo: string;
+  cliente: string;
+  cnpj: string;
+  endereco: string;
+  cep: string;
+  emailFin: string;
+  telefoneFixo?: string;
+  celular?: string;
+  email: string;
+  inscEstad: string;
+  suframa?: string;
+}
 
-const CarrierPage = ({ fornecedores, clientes, transportadora }) => {
-  const [nomeTransportadora, setNomeTransportadora] = useState("");
-  const [codigo, setCodigo] = useState("");
-  const [numeroNF, setNumeroNF] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [quantidade, setQuantidade] = useState(0);
-  const [unidade, setUnidade] = useState("");
-  const [valorTotal, setValorTotal] = useState(0);
-  const [dataSaida, setDataSaida] = useState("");
+interface Fornecedor {
+  id: string;
+  codigo: string;
+  fornecedor: string;
+  cnpj: string;
+  endereco: string;
+  telefoneFixo?: string;
+  cep: string;
+  emailFin: string;
+  celular?: string;
+  emailPedido: string;
+  inscEstad: string;
+  comissao?: number;
+  dataRecebimento?: Date;
+}
 
-  const handleExportXLSX = () => {
-    const transportadoraData = [
-      {
-        Nome: nomeTransportadora,
-        Codigo: codigo,
-        NF: numeroNF,
-        Descricao: descricao,
-        Quantidade: quantidade,
-        Unidade: unidade,
-        ValorTotal: valorTotal,
-        DataSaida: dataSaida,
-      },
-    ];
+interface Transportadora {
+  id: string;
+  codigo: string;
+  transportadora: string;
+  numeroNF: string;
+  descricao?: string;
+  quantidade: number;
+  valorUn: number;
+  valorTotal: number;
+  dataSaida?: Date;
+}
 
-    const ws = XLSX.utils.json_to_sheet(transportadoraData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Transportadora");
-    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const file = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(file, "transportadora.xlsx");
-  };
+const TransportadoraExport: React.FC = () => {
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
+  const [transportadoras, setTransportadoras] = useState<Transportadora[]>([]);
+
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [selectedFornecedor, setSelectedFornecedor] =
+    useState<Fornecedor | null>(null);
+  const [selectedTransportadora, setSelectedTransportadora] =
+    useState<Transportadora | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [clientesRes, fornecedoresRes, transportadorasRes] =
+          await Promise.all([
+            fetch("/api/clientes"),
+            fetch("/api/fornecedores"),
+            fetch("/api/transportadora"),
+          ]);
+
+        const clientesData = await clientesRes.json();
+        const fornecedoresData = await fornecedoresRes.json();
+        const transportadorasData = await transportadorasRes.json();
+
+        setClientes(clientesData);
+        setFornecedores(fornecedoresData);
+        setTransportadoras(transportadorasData);
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleExportPDF = () => {
+    if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
+      alert("Por favor, selecione todos os dados necessários");
+      return;
+    }
+
     const doc = new jsPDF();
-    doc.text("Transportadora - Dados", 20, 20);
-    doc.text(`Nome: ${nomeTransportadora}`, 20, 30);
-    doc.text(`Código: ${codigo}`, 20, 40);
-    doc.text(`Número NF: ${numeroNF}`, 20, 50);
-    doc.text(`Descrição: ${descricao}`, 20, 60);
-    doc.text(`Quantidade: ${quantidade}`, 20, 70);
-    doc.text(`Unidade: ${unidade}`, 20, 80);
-    doc.text(`Valor Total: ${valorTotal}`, 20, 90);
-    doc.text(`Data de Saída: ${dataSaida}`, 20, 100);
-    doc.save("transportadora.pdf");
+    doc.setFont("helvetica");
+    doc.setFontSize(10);
+
+    // Cabeçalho
+    doc.text(`${selectedFornecedor.fornecedor}`, 20, 20);
+    doc.text(`Pedido nº: ${selectedFornecedor.codigo}`, 150, 20);
+    doc.text(`${selectedFornecedor.endereco}`, 20, 25);
+    doc.text(`${selectedFornecedor.cep}`, 150, 25);
+    doc.text(
+      `${selectedFornecedor.telefoneFixo} / ${selectedFornecedor.celular}`,
+      20,
+      30
+    );
+    doc.text(`${selectedFornecedor.emailFin}`, 20, 35);
+
+    // // Dados do Fornecedor
+    // doc.text("FORNECEDOR:", 20, 45);
+    // doc.text(`${selectedFornecedor.fornecedor}`, 70, 45);
+    // doc.text(`Código: ${selectedFornecedor.codigo}`, 20, 50);
+    // doc.text(`CNPJ: ${selectedFornecedor.cnpj}`, 20, 55);
+    // doc.text(`Endereço: ${selectedFornecedor.endereco}`, 20, 60);
+    // doc.text(`CEP: ${selectedFornecedor.cep}`, 150, 60);
+
+    // Dados do Cliente
+    doc.text("CLIENTE:", 20, 75);
+    doc.text(`${selectedCliente.cliente}`, 70, 75);
+    doc.text(`Código: ${selectedCliente.codigo}`, 20, 80);
+    doc.text(`CNPJ: ${selectedCliente.cnpj}`, 20, 85);
+    doc.text(`Endereço: ${selectedCliente.endereco}`, 20, 90);
+    doc.text(`CEP: ${selectedCliente.cep}`, 150, 90);
+    doc.text(`IE: ${selectedCliente.inscEstad}`, 20, 95);
+    doc.text(`Suframa: ${selectedCliente.suframa || "Inexistente"}`, 150, 95);
+
+    // Dados da Transportadora
+    doc.text("TRANSPORTADORA:", 20, 110);
+    doc.text(`${selectedTransportadora.transportadora}`, 70, 110);
+    doc.text(`NF: ${selectedTransportadora.numeroNF}`, 20, 115);
+    doc.text(
+      `Data Saída: ${
+        selectedTransportadora.dataSaida
+          ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
+          : ""
+      }`,
+      150,
+      115
+    );
+
+    // Tabela de Produtos
+    const headers = [
+      "Código",
+      "Descrição do Produto",
+      "Unid.",
+      "Qtde",
+      "Valor Un.",
+      "Total",
+    ];
+    let y = 130;
+
+    // Cabeçalho da tabela
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, y - 5, 170, 7, "F");
+    headers.forEach((header, i) => {
+      const x = 20 + i * 28;
+      doc.text(header, x, y);
+    });
+
+    // 4 linhas vazias para preenchimento manual
+    for (let i = 0; i < 4; i++) {
+      y += 10;
+      doc.line(20, y, 190, y);
+    }
+
+    // Footer
+    doc.text("VISITEM NOSSO SHOWROOM", 80, 270);
+    doc.text("ONE REPRESENTAÇÕES AGRADECE A SUA PREFERÊNCIA !!!", 60, 275);
+    doc.text(
+      "W W W . O N E R E P R E S E N T A C O E S . C O M . B R",
+      60,
+      280
+    );
+
+    doc.save("pedido.pdf");
+  };
+
+  const handleExportXLSX = () => {
+    if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
+      alert("Por favor, selecione todos os dados necessários");
+      return;
+    }
+
+    const headerData = [
+      // [
+      //   "ONE REPRESENTAÇÕES",
+      //   "",
+      //   "",
+      //   `Pedido nº: ${selectedTransportadora.codigo}`,
+      //   "",
+      // ],
+      // ["Av. Prestes Maia 702 - 6º And Sl 61", "", "", "CEP:01031-000", ""],
+      // ["Fones: (0xx11) 3313-7217 / (0xx11) 3313-7741", "", "", "", ""],
+      // ["email: financeiro@onerepresentacoes.com.br", "", "", "", ""],
+      [""],
+      ["FORNECEDOR:", selectedFornecedor.fornecedor, "", "", ""],
+      [
+        "Código:",
+        selectedFornecedor.codigo,
+        "CNPJ:",
+        selectedFornecedor.cnpj,
+        "",
+      ],
+      [
+        "Endereço:",
+        selectedFornecedor.endereco,
+        "CEP:",
+        selectedFornecedor.cep,
+        "",
+      ],
+      [""],
+      ["CLIENTE:", selectedCliente.cliente, "", "", ""],
+      ["Código:", selectedCliente.codigo, "CNPJ:", selectedCliente.cnpj, ""],
+      ["Endereço:", selectedCliente.endereco, "CEP:", selectedCliente.cep, ""],
+      [
+        "IE:",
+        selectedCliente.inscEstad,
+        "Suframa:",
+        selectedCliente.suframa || "Inexistente",
+        "",
+      ],
+      [""],
+      ["TRANSPORTADORA:", selectedTransportadora.transportadora, "", "", ""],
+      [
+        "NF:",
+        selectedTransportadora.numeroNF,
+        "Data Saída:",
+        selectedTransportadora.dataSaida
+          ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
+          : "",
+        "",
+      ],
+      [""],
+      ["Código", "Descrição do Produto", "Unid.", "Qtde", "Valor Un.", "Total"],
+      ["", "", "", "", "", ""],
+      ["", "", "", "", "", ""],
+      ["", "", "", "", "", ""],
+      ["", "", "", "", "", ""],
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(headerData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Pedido");
+
+    ws["!cols"] = [
+      { wch: 15 },
+      { wch: 40 },
+      { wch: 8 },
+      { wch: 10 },
+      { wch: 12 },
+      { wch: 12 },
+    ];
+
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const file = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(file, "pedido.xlsx");
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-4xl">
-        <CardHeader className="space-y-2">
-          <Image
-            src="/logo.svg"
-            alt="logo"
-            width={80}
-            height={50}
-            className="rounded-md"
-          />
-          <CardTitle className="text-center text-2xl font-bold">
-            Cadastro de Transportadora
-          </CardTitle>
-          <div className="text-center text-lg text-gray-600">
-            Informe os dados da transportadora
-          </div>
+    <div className="p-6 min-h-screen">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Seleção de Fornecedor */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Fornecedor</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <select
+              className="w-full p-2 border rounded-md"
+              value={selectedFornecedor?.id || ""}
+              onChange={(e) =>
+                setSelectedFornecedor(
+                  fornecedores.find((f) => f.id === e.target.value) || null
+                )
+              }
+            >
+              <option value="">Selecione um fornecedor</option>
+              {fornecedores.map((fornecedor) => (
+                <option key={fornecedor.id} value={fornecedor.id}>
+                  {fornecedor.fornecedor} - {fornecedor.codigo}
+                </option>
+              ))}
+            </select>
+          </CardContent>
+        </Card>
+
+        {/* Seleção de Cliente */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Cliente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <select
+              className="w-full p-2 border rounded-md"
+              value={selectedCliente?.id || ""}
+              onChange={(e) =>
+                setSelectedCliente(
+                  clientes.find((c) => c.id === e.target.value) || null
+                )
+              }
+            >
+              <option value="">Selecione um cliente</option>
+              {clientes.map((cliente) => (
+                <option key={cliente.id} value={cliente.id}>
+                  {cliente.cliente} - {cliente.codigo}
+                </option>
+              ))}
+            </select>
+          </CardContent>
+        </Card>
+
+        {/* Seleção de Transportadora */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Transportadora</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <select
+              className="w-full p-2 border rounded-md"
+              value={selectedTransportadora?.id || ""}
+              onChange={(e) =>
+                setSelectedTransportadora(
+                  transportadoras.find((t) => t.id === e.target.value) || null
+                )
+              }
+            >
+              <option value="">Selecione uma transportadora</option>
+              {transportadoras.map((transportadora) => (
+                <option key={transportadora.id} value={transportadora.id}>
+                  {transportadora.transportadora} - NF:{" "}
+                  {transportadora.numeroNF}
+                </option>
+              ))}
+            </select>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Área de Visualização dos Dados Selecionados */}
+      <Card className="mb-6 ">
+        <CardHeader>
+          <CardTitle>Dados Selecionados</CardTitle>
         </CardHeader>
 
-        <CardContent>
-          <form className="space-y-6">
-            <div className="md:grid flex flex-col gap-6 md:grid-cols-2">
-              {/* Informações de Transportadora */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nomeTransportadora">
-                    Nome da Transportadora:
-                  </Label>
-                  <Input
-                    id="nomeTransportadora"
-                    value={nomeTransportadora}
-                    onChange={(e) => setNomeTransportadora(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="codigo">Código:</Label>
-                  <Input
-                    id="codigo"
-                    value={codigo}
-                    onChange={(e) => setCodigo(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="numeroNF">Número NF:</Label>
-                  <Input
-                    id="numeroNF"
-                    value={numeroNF}
-                    onChange={(e) => setNumeroNF(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="descricao">Descrição:</Label>
-                  <Input
-                    id="descricao"
-                    value={descricao}
-                    onChange={(e) => setDescricao(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="quantidade">Quantidade:</Label>
-                  <Input
-                    id="quantidade"
-                    type="number"
-                    value={quantidade}
-                    onChange={(e) => setQuantidade(Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="unidade">Unidade:</Label>
-                  <Input
-                    id="unidade"
-                    value={unidade}
-                    onChange={(e) => setUnidade(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="valorTotal">Valor Total:</Label>
-                  <Input
-                    id="valorTotal"
-                    type="number"
-                    value={valorTotal}
-                    onChange={(e) => setValorTotal(Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="dataSaida">Data de Saída:</Label>
-                  <Input
-                    id="dataSaida"
-                    type="date"
-                    value={dataSaida}
-                    onChange={(e) => setDataSaida(e.target.value)}
-                  />
-                </div>
-              </div>
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {selectedFornecedor && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Fornecedor:</CardTitle>
+              </CardHeader>
 
-              {/* Clientes e Fornecedores */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Clientes:</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um cliente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clientes.map((cliente) => (
-                        <SelectItem key={cliente.id} value={cliente.id}>
-                          {cliente.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Fornecedores:</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um fornecedor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fornecedores.map((fornecedor) => (
-                        <SelectItem key={fornecedor.id} value={fornecedor.id}>
-                          {fornecedor.nome}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
+              <CardContent>
+                <p>{selectedFornecedor.fornecedor}</p>
+                <p>Código: {selectedFornecedor.codigo}</p>
+                <p>CNPJ: {selectedFornecedor.cnpj}</p>
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Botões */}
-            <div className="mt-6 flex flex-col sm:flex-row justify-end space-x-0 sm:space-x-4 space-y-4 sm:space-y-0">
-              <Button variant="outline" type="button">
-                Cancelar
-              </Button>
-              <Button type="button" onClick={handleExportXLSX}>
-                Exportar XLSX
-              </Button>
-              <Button type="button" onClick={handleExportPDF}>
-                Exportar PDF
-              </Button>
-            </div>
-          </form>
+          {selectedCliente && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Cliente:</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{selectedCliente.cliente}</p>
+                <p>Código: {selectedCliente.codigo}</p>
+                <p>CNPJ: {selectedCliente.cnpj}</p>
+              </CardContent>
+            </Card>
+          )}
+          {selectedTransportadora && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Transportadora:</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{selectedTransportadora.transportadora}</p>
+                <p>NF: {selectedTransportadora.numeroNF}</p>
+                <p>
+                  Data:{" "}
+                  {selectedTransportadora.dataSaida
+                    ? format(
+                        new Date(selectedTransportadora.dataSaida),
+                        "dd/MM/yyyy"
+                      )
+                    : "Não definida"}
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </CardContent>
       </Card>
+
+      {/* Botões de Exportação */}
+      <div className="flex gap-4 justify-end">
+        <Button
+          onClick={handleExportPDF}
+          className="disabled:opacity-50"
+          disabled={
+            !selectedCliente || !selectedFornecedor || !selectedTransportadora
+          }
+        >
+          Exportar PDF
+        </Button>
+        <Button
+          onClick={handleExportXLSX}
+          className="bg-green-500 hover:bg-green-600 disabled:opacity-50"
+          disabled={
+            !selectedCliente || !selectedFornecedor || !selectedTransportadora
+          }
+        >
+          Exportar XLSX
+        </Button>
+      </div>
     </div>
   );
 };
 
-export default CarrierPage;
+export default TransportadoraExport;
