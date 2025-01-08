@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useState, useEffect } from "react";
 import { saveAs } from "file-saver";
@@ -11,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/app/_components/ui/card";
+import { LogOut } from "lucide-react";
 
 interface Cliente {
   id: string;
@@ -91,16 +93,17 @@ const TransportadoraExport: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleExportPDF = () => {
+  //Função Pré Visualizar 
+  const handlePreviewPDF = async () => {
     if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
       alert("Por favor, selecione todos os dados necessários");
       return;
     }
-
+  
     const doc = new jsPDF();
     doc.setFont("helvetica");
     doc.setFontSize(10);
-
+  
     // Cabeçalho
     doc.text(`${selectedFornecedor.fornecedor}`, 20, 20);
     doc.text(`Pedido nº: ${selectedFornecedor.codigo}`, 150, 20);
@@ -112,15 +115,7 @@ const TransportadoraExport: React.FC = () => {
       30
     );
     doc.text(`${selectedFornecedor.emailFin}`, 20, 35);
-
-    // // Dados do Fornecedor
-    // doc.text("FORNECEDOR:", 20, 45);
-    // doc.text(`${selectedFornecedor.fornecedor}`, 70, 45);
-    // doc.text(`Código: ${selectedFornecedor.codigo}`, 20, 50);
-    // doc.text(`CNPJ: ${selectedFornecedor.cnpj}`, 20, 55);
-    // doc.text(`Endereço: ${selectedFornecedor.endereco}`, 20, 60);
-    // doc.text(`CEP: ${selectedFornecedor.cep}`, 150, 60);
-
+  
     // Dados do Cliente
     doc.text("CLIENTE:", 20, 75);
     doc.text(`${selectedCliente.cliente}`, 70, 75);
@@ -130,7 +125,7 @@ const TransportadoraExport: React.FC = () => {
     doc.text(`CEP: ${selectedCliente.cep}`, 150, 90);
     doc.text(`IE: ${selectedCliente.inscEstad}`, 20, 95);
     doc.text(`Suframa: ${selectedCliente.suframa || "Inexistente"}`, 150, 95);
-
+  
     // Dados da Transportadora
     doc.text("TRANSPORTADORA:", 20, 110);
     doc.text(`${selectedTransportadora.transportadora}`, 70, 110);
@@ -144,7 +139,103 @@ const TransportadoraExport: React.FC = () => {
       150,
       115
     );
+  
+    // Tabela de Produtos
+    const headers = [
+      "Código",
+      "Descrição do Produto",
+      "Unid.",
+      "Qtde",
+      "Valor Un.",
+      "Total"
+    ];
+    let y = 130;
+  
+    // Cabeçalho da tabela
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, y - 5, 170, 7, "F");
+    headers.forEach((header, i) => {
+      const x = 20 + i * 28;
+      doc.text(header, x, y);
+    });
+  
+    // 4 linhas vazias para preenchimento manual
+    for (let i = 0; i < 4; i++) {
+      y += 10;
+      doc.line(20, y, 190, y);
+    }
+  
+    // Adicionando imagem ao PDF a partir da pasta public
+    const imageUrl = "/logo.svg"; // Caminho relativo à raiz do projeto
+    const image = await fetch(imageUrl).then((res) => res.blob());
+    const reader = new FileReader();
+    reader.onload = function () {
+      if (reader.result) {
+        const base64Image = reader.result.toString().split(",")[1];
+        doc.addImage(base64Image, "PNG", 150, 10, 50, 30); // Ajuste a posição e o tamanho conforme necessário
+  
+        // Footer
+        doc.text("VISITEM NOSSO SHOWROOM", 80, 270);
+        doc.text("ONE REPRESENTAÇÕES AGRADECE A SUA PREFERÊNCIA !!!", 60, 275);
+        doc.text("W W W . O N E R E P R E S E N T A C O E S . C O M . B R", 60, 280);
+  
+        // Abrir a pré-visualização em uma nova janela
+        window.open(doc.output('bloburl'), '_blank');
+      } else {
+        alert("Falha ao carregar a imagem.");
+      }
+    };
+    reader.readAsDataURL(image);
+  };
+  
+  
 
+  const handleExportPDF = async () => {
+    if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
+      alert("Por favor, selecione todos os dados necessários");
+      return;
+    }
+  
+    const doc = new jsPDF();
+    doc.setFont("helvetica");
+    doc.setFontSize(10);
+  
+    // Cabeçalho
+    doc.text(`${selectedFornecedor.fornecedor}`, 20, 20);
+    doc.text(`Pedido nº: ${selectedFornecedor.codigo}`, 150, 20);
+    doc.text(`${selectedFornecedor.endereco}`, 20, 25);
+    doc.text(`${selectedFornecedor.cep}`, 150, 25);
+    doc.text(
+      `${selectedFornecedor.telefoneFixo} / ${selectedFornecedor.celular}`,
+      20,
+      30
+    );
+    doc.text(`${selectedFornecedor.emailFin}`, 20, 35);
+  
+    // Dados do Cliente
+    doc.text("CLIENTE:", 20, 75);
+    doc.text(`${selectedCliente.cliente}`, 70, 75);
+    doc.text(`Código: ${selectedCliente.codigo}`, 20, 80);
+    doc.text(`CNPJ: ${selectedCliente.cnpj}`, 20, 85);
+    doc.text(`Endereço: ${selectedCliente.endereco}`, 20, 90);
+    doc.text(`CEP: ${selectedCliente.cep}`, 150, 90);
+    doc.text(`IE: ${selectedCliente.inscEstad}`, 20, 95);
+    doc.text(`Suframa: ${selectedCliente.suframa || "Inexistente"}`, 150, 95);
+  
+    // Dados da Transportadora
+    doc.text("TRANSPORTADORA:", 20, 110);
+    doc.text(`${selectedTransportadora.transportadora}`, 70, 110);
+    doc.text(`NF: ${selectedTransportadora.numeroNF}`, 20, 115);
+    doc.text(
+      `Data Saída: ${
+        selectedTransportadora.dataSaida
+          ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
+          : ""
+      }`,
+      150,
+      115
+    );
+  
     // Tabela de Produtos
     const headers = [
       "Código",
@@ -155,7 +246,7 @@ const TransportadoraExport: React.FC = () => {
       "Total",
     ];
     let y = 130;
-
+  
     // Cabeçalho da tabela
     doc.setFillColor(240, 240, 240);
     doc.rect(20, y - 5, 170, 7, "F");
@@ -163,25 +254,35 @@ const TransportadoraExport: React.FC = () => {
       const x = 20 + i * 28;
       doc.text(header, x, y);
     });
-
+  
     // 4 linhas vazias para preenchimento manual
     for (let i = 0; i < 4; i++) {
       y += 10;
       doc.line(20, y, 190, y);
     }
-
-    // Footer
-    doc.text("VISITEM NOSSO SHOWROOM", 80, 270);
-    doc.text("ONE REPRESENTAÇÕES AGRADECE A SUA PREFERÊNCIA !!!", 60, 275);
-    doc.text(
-      "W W W . O N E R E P R E S E N T A C O E S . C O M . B R",
-      60,
-      280
-    );
-
-    doc.save("pedido.pdf");
+  
+    // Adicionando imagem ao PDF a partir da pasta public
+    const imageUrl = "/logo.png"; // Caminho relativo à raiz do projeto
+    const image = await fetch(imageUrl).then((res) => res.blob());
+    const reader = new FileReader();
+    reader.onload = function () {
+      if (reader.result) {
+        const base64Image = reader.result.toString().split(",")[1];
+        doc.addImage(base64Image, "PNG", 150, 10, 50, 30); // Ajuste a posição e o tamanho conforme necessário
+  
+        // Footer
+        doc.text("VISITEM NOSSO SHOWROOM", 80, 270);
+        doc.text("ONE REPRESENTAÇÕES AGRADECE A SUA PREFERÊNCIA !!!", 60, 275);
+        doc.text("W W W . O N E R E P R E S E N T A C O E S . C O M . B R", 60, 280);
+  
+        doc.save("pedido.pdf");
+      } else {
+        alert("Falha ao carregar a imagem.");
+      }
+    };
+    reader.readAsDataURL(image);
   };
-
+  
   const handleExportXLSX = () => {
     if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
       alert("Por favor, selecione todos os dados necessários");
@@ -401,15 +502,14 @@ const TransportadoraExport: React.FC = () => {
 
       {/* Botões de Exportação */}
       <div className="flex gap-4 justify-end">
-        <Button
-          onClick={handleExportPDF}
-          className="disabled:opacity-50"
-          disabled={
+      
+  <Button onClick={handlePreviewPDF } className="disabled:opacity-50"   disabled={
             !selectedCliente || !selectedFornecedor || !selectedTransportadora
-          }
-        >
-          Exportar PDF
-        </Button>
+          }>Pré-visualizar PDF</Button>
+  <Button onClick={handleExportPDF} className="disabled:opacity-50"   disabled={
+            !selectedCliente || !selectedFornecedor || !selectedTransportadora
+          }>Exportar PDF</Button>
+</div>
         <Button
           onClick={handleExportXLSX}
           className="bg-green-500 hover:bg-green-600 disabled:opacity-50"
@@ -417,10 +517,10 @@ const TransportadoraExport: React.FC = () => {
             !selectedCliente || !selectedFornecedor || !selectedTransportadora
           }
         >
+
           Exportar XLSX
         </Button>
       </div>
-    </div>
   );
 };
 
