@@ -19,8 +19,9 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(transportadora);
+    return NextResponse.json(transportadora, { status: 200 });
   } catch (error) {
+    console.error("Erro ao buscar transportadora:", error);
     return NextResponse.json(
       { error: "Erro ao buscar transportadora" },
       { status: 500 }
@@ -34,7 +35,34 @@ export async function PUT(
 ) {
   try {
     const data = await request.json();
-    const transportadora = await prisma.transportadora.update({
+
+    // Validação básica
+    if (
+      !data.codigo ||
+      !data.transportadora ||
+      !data.NumeroNF ||
+      !data.quantidade ||
+      !data.valorUn ||
+      !data.ValorTotal
+    ) {
+      return NextResponse.json(
+        { error: "Campos obrigatórios estão faltando" },
+        { status: 400 }
+      );
+    }
+
+    const quantidade = parseInt(data.quantidade);
+    const valorTotal = parseFloat(data.ValorTotal);
+    const valorUn = parseFloat(data.valorUn);
+
+    if (isNaN(quantidade) || isNaN(valorTotal) || isNaN(valorUn)) {
+      return NextResponse.json(
+        { error: "Quantidade, ValorUn e ValorTotal devem ser numéricos" },
+        { status: 400 }
+      );
+    }
+
+    const updatedTransportadora = await prisma.transportadora.update({
       where: {
         id: params.id,
       },
@@ -42,17 +70,19 @@ export async function PUT(
         codigo: data.codigo,
         transportadora: data.transportadora,
         numeroNF: data.NumeroNF,
-        descricao: data.descricao,
-        quantidade: parseInt(data.quantidade),
-        valorUn: data.ValorUn,
-        valorTotal: parseFloat(data.ValorTotal),
+        descricao: data.descricao || "", // Permite que a descrição seja opcional
+        quantidade,
+        valorUn,
+        valorTotal,
         dataSaida: data.DataSaida ? new Date(data.DataSaida) : null,
       },
     });
-    return NextResponse.json(transportadora);
-  } catch (error) {
+
+    return NextResponse.json(updatedTransportadora, { status: 200 });
+  } catch (error: any) {
+    console.error("Erro ao atualizar transportadora:", error);
     return NextResponse.json(
-      { error: "Erro ao atualizar transportadora" },
+      { error: error.message || "Erro ao atualizar transportadora" },
       { status: 500 }
     );
   }
@@ -63,15 +93,31 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const transportadora = await prisma.transportadora.findUnique({
+      where: {
+        id: params.id,
+      },
+    });
+
+    if (!transportadora) {
+      return NextResponse.json(
+        { error: "Transportadora não encontrada" },
+        { status: 404 }
+      );
+    }
+
     await prisma.transportadora.delete({
       where: {
         id: params.id,
       },
     });
-    return NextResponse.json({
-      message: "Transportadora deletada com sucesso",
-    });
+
+    return NextResponse.json(
+      { message: "Transportadora deletada com sucesso" },
+      { status: 200 }
+    );
   } catch (error) {
+    console.error("Erro ao deletar transportadora:", error);
     return NextResponse.json(
       { error: "Erro ao deletar transportadora" },
       { status: 500 }

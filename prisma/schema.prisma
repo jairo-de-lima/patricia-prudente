@@ -10,22 +10,23 @@ datasource db {
 model Cliente {
   id             String   @id @default(uuid())
   dataCad        DateTime @default(now())
-  codigo         String   @unique
+  codigo         String?
   razaoSocial    String
   cnpj           String   @unique
-  ie             String   // Inscrição Estadual
+  ie             String   @unique
   endereco       String
-  numero         String
+  endNumero      String
   cep            String
   cidade         String
   estado         String
   telefoneFixo   String?
   celular        String?
-  email          String
-  emailFina      String
-  suframa        String?  @default("200405500")
-  transpMetralon String?  // Campo Transp. Metrafon
+  email          String?
+  emailFin       String?
+  suframa        String?  
+  transp         String? 
   tel            String?
+  NumeroNF       String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -37,20 +38,21 @@ model Cliente {
 model Fornecedor {
   id              String   @id @default(uuid())
   dataCad         DateTime @default(now())
-  codigo          String   @unique
+  codigo          String?   
   razaoSocial     String
   cnpj            String   @unique
-  ie              String   // Inscrição Estadual
+  ie              String   @unique
   endereco        String
-  endNumero          String
+  endNumero       String
   cep             String
   telefoneFixo    String?
   celular         String?
-  emailPedido     String
-  emailFin       String
-  comissao        String?  @default("2%")
-  dataRecebimento String?  @default("20")
+  emailPedido     String?
+  emailFin        String
+  comissao        String?  
+  dataRecebimento DateTime?  
   obs             String?  @db.Text
+  NumeroNF        String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -62,20 +64,21 @@ model Fornecedor {
 model Transportadora {
   id             String      @id @default(uuid())
   dataCad        DateTime    @default(now())
-  codigo         String      @unique
+  codigo         String?
   razaoSocial    String
   cnpj           String      @unique
-  ie             String      // Inscrição Estadual
-  endereco       String
-  numero         String
-  cep            String
-  cidade         String
-  estado         String
+  ie             String      @unique
+  endereco       String?
+  endNumero      String?
+  cep            String?
+  cidade         String?
+  estado         String?
   telefoneFixo   String?
   celular        String?
-  email          String
-  emailFina      String
+  email          String?
+  emailFina      String?
   obs            String?     @db.Text
+  NumeroNF       String?
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   Cliente        Cliente?    @relation(fields: [clienteId], references: [id])

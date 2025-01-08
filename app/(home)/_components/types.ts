@@ -16,7 +16,7 @@ type FormConfig = {
   fields: {
     leftColumn: FieldConfig[];
     rightColumn: FieldConfig[];
-    extras: string;
+    extras: [];
     obs: string;
   };
 };

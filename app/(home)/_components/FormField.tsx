@@ -14,13 +14,13 @@ const FormField = ({ field, defaultValue = "" }: FormFieldProps) => (
     <div className="flex-1">
       {field.prefix ? (
         <div className="flex items-center">
-          <span className="mr-1 text-sm text-gray-500">{field.prefix}</span>
           <Input
             id={field.id}
             name={field.id}
             type={field.type}
             required={field.required}
             defaultValue={field.value || defaultValue}
+            placeholder={field.prefix}
             className="flex-1"
           />
         </div>

@@ -22,10 +22,8 @@ const RegistrationForm = ({ onSubmit, initialData = {} }) => {
 
     // Atualizar a validação para checar apenas campos obrigatórios
     const config = formConfigs[formType];
-    const allFields = [
-      ...config.fields.leftColumn,
-      ...config.fields.rightColumn,
-    ];
+    const allFields = [...config.fields.leftColumn];
+
     const requiredFields = allFields
       .filter((field) => field.required && !data[field.id])
       .map((field) => field.label);

@@ -89,12 +89,20 @@ const FormContent = ({ config, initialData = {} }: FormContentProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            {Object.entries(config.fields.extras).map(([key, value]) => (
+            {/* {Object.entries(config.fields.extras).map(([key, value]) => (
               <div key={key} className="flex items-center gap-2">
-                <Label>{key}:</Label>
-                <span>{value}</span>
+                <Label>{value.id}:</Label>
+                <Input
+                  id={value.id}
+                  name={value.Label}
+                  type={value.type}
+                  required={value.required}
+                  defaultValue={initialData[value.id] || ""}
+                  className="flex-1 gap-2"
+                />
               </div>
-            ))}
+            ))} */}
+            {config.fields.extras.map(renderFields)}
           </motion.div>
         )}
 

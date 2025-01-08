@@ -1,45 +1,73 @@
-export interface Cliente {
+export type Cliente = {
   id: string;
+  dataCad: Date;
   codigo: string;
-  cliente: string;
-  cnpj: string;
-  end: string;
-  telFixo?: string;
-  email: string;
-  suframa?: string;
-  transportadora?: string;
-  ie: string;
-  cep: string;
-  cel: string;
-  emailFinan: string;
-}
-
-export interface Fornecedor {
-  id: string;
-  codigo: string;
-  fornecedor: string;
-  cnpj: string;
+  razaoSocial: string;
+  cnpj: string; // Deve ser único
+  ie: string; // Inscrição Estadual, único
   endereco: string;
-  telFixo?: string;
-  emailPedido?: string;
-  ie: string;
+  endNumero: string;
   cep: string;
-  celular: string;
-  comissao?: number;
-  dataRecebimento?: Date;
-  emailFinan: string;
-}
-
-export interface Transportadora {
-  id: string;
-  codigo: string;
-  transportadora: string;
-  numeroNF: string;
-  descricao?: string;
-  quantidade?: number;
-  valorUn?: number;
-  valorTotal?: number;
-  dataSaida?: Date;
+  cidade: string;
+  estado: string;
+  telefoneFixo?: string;
+  celular?: string;
+  email?: string;
+  emailFin: string;
+  suframa?: string;
+  transp?: string;
+  tel?: string;
+  NumeroNF?: string;
   createdAt: Date;
   updatedAt: Date;
-}
+  transportadoras?: Transportadora[];
+};
+
+export type Fornecedor = {
+  id: string;
+  dataCad: Date;
+  codigo: string;
+  razaoSocial: string;
+  cnpj: string; // Deve ser único
+  ie: string; // Inscrição Estadual, único
+  endereco: string;
+  endNumero: string;
+  cep: string;
+  telefoneFixo?: string;
+  celular?: string;
+  emailPedido: string;
+  emailFin: string;
+  comissao?: string;
+  dataRecebimento?: Date;
+  obs?: string;
+  NumeroNF?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  transportadoras?: Transportadora[];
+};
+
+export type Transportadora = {
+  id: string;
+  dataCad: Date;
+  codigo: string;
+  razaoSocial: string;
+  cnpj: string; // Deve ser único
+  ie: string; // Inscrição Estadual, único
+  endereco: string;
+  endNumero: string;
+  cep: string;
+  cidade: string;
+  estado: string;
+  telefoneFixo?: string;
+  celular?: string;
+  email?: string;
+  emailFina?: string;
+  obs?: string;
+  NumeroNF?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  clienteId?: string;
+  fornecedorId?: string;
+  Cliente?: Cliente;
+  Fornecedor?: Fornecedor;
+};

@@ -1,6 +1,7 @@
 export const formConfigs = {
   cliente: {
     title: "Cadastro de Cliente",
+    codLabel: "Código do Cliente",
     dataCad: true,
     fields: {
       leftColumn: [
@@ -16,8 +17,8 @@ export const formConfigs = {
           id: "endereco",
           isRow: true,
           fields: [
-            { id: "end", label: "END", type: "text", required: true },
-            { id: "numero", label: "Nº", type: "text", required: true },
+            { id: "endereco", label: "END", type: "text", required: true },
+            { id: "endNumero", label: "Nº", type: "text", required: true },
             { id: "cep", label: "Cep", type: "text", required: true },
           ],
         },
@@ -34,14 +35,14 @@ export const formConfigs = {
           isRow: true,
           fields: [
             {
-              id: "telFixo",
+              id: "telefoneFixo",
               label: "Tel Fixo",
               type: "tel",
               required: true,
               prefix: "(11)",
             },
             {
-              id: "telCel",
+              id: "celular",
               label: "Tel Cel",
               type: "tel",
               required: true,
@@ -50,12 +51,12 @@ export const formConfigs = {
           ],
         },
         {
-          id: " E-mails",
+          id: "emails",
           isRow: true,
           fields: [
             { id: "email", label: "Email", type: "email", required: true },
             {
-              id: "emailFina",
+              id: "emailFin",
               label: "Email Financeiro",
               type: "email",
               required: true,
@@ -64,7 +65,7 @@ export const formConfigs = {
         },
 
         { id: "suframa", label: "Suframa", type: "text", require: false },
-        { id: "Transportadora", label: "Transportadora", type: "text" },
+        { id: "transp", label: "Transportadora", type: "text" },
         { id: "tel", label: "Telefone", type: "tel", prefix: "(11)" },
       ],
     },
@@ -88,8 +89,8 @@ export const formConfigs = {
           id: "endereco",
           isRow: true,
           fields: [
-            { id: "end", label: "END", type: "text", required: true },
-            { id: "numero", label: "Nº", type: "text", required: true },
+            { id: "endereco", label: "END", type: "text", required: true },
+            { id: "endNumero", label: "Nº", type: "text", required: true },
             { id: "cep", label: "Cep", type: "text", required: true },
           ],
         },
@@ -98,14 +99,14 @@ export const formConfigs = {
           isRow: true,
           fields: [
             {
-              id: "telFixo",
+              id: "telefoneFixo",
               label: "Tel Fixo",
               type: "tel",
-              required: true,
-              prefix: "(11)",
+              required: false,
+              prefix: "( )",
             },
             {
-              id: "telCel",
+              id: "celular",
               label: "Tel Cel",
               type: "tel",
               required: true,
@@ -117,14 +118,25 @@ export const formConfigs = {
           id: "emailPedido",
           label: "Email Pedido",
           type: "email",
-          required: true,
+          required: false,
         },
-        { id: "emailFina", label: "Email Fina", type: "email", required: true },
+        { id: "emailFin", label: "Email Fina", type: "email", required: true },
       ],
-      extras: {
-        comissao: "2%",
-        dataRecebimento: "20",
-      },
+      extras: [
+        {
+          id: "comissao",
+          label: "Comissao",
+          type: "number",
+          required: false,
+        },
+        {
+          id: "dataRecebimento",
+          label: "Data de recebimento",
+          type: "date",
+          required: false,
+        },
+      ],
+
       obs: true,
     },
   },
@@ -147,17 +159,17 @@ export const formConfigs = {
           id: "endereco",
           isRow: true,
           fields: [
-            { id: "end", label: "END", type: "text", required: true },
-            { id: "numero", label: "Nº", type: "text", required: true },
-            { id: "cep", label: "Cep", type: "text", required: true },
+            { id: "endereco", label: "END", type: "text", required: false },
+            { id: "endNumero", label: "Nº", type: "text", required: false },
+            { id: "cep", label: "Cep", type: "text", required: false },
           ],
         },
         {
           id: "localizacao",
           isRow: true,
           fields: [
-            { id: "cidade", label: "CIDADE", type: "text", required: true },
-            { id: "estado", label: "ESTADO", type: "text", required: true },
+            { id: "cidade", label: "CIDADE", type: "text", required: false },
+            { id: "estado", label: "ESTADO", type: "text", required: false },
           ],
         },
         {
@@ -165,27 +177,27 @@ export const formConfigs = {
           isRow: true,
           fields: [
             {
-              id: "telFixo",
+              id: "telefoneFixo",
               label: "Tel Fixo",
               type: "tel",
-              required: true,
+              required: false,
               prefix: "(11)",
             },
             {
-              id: "telCel",
+              id: "celular",
               label: "Tel Cel",
               type: "tel",
-              required: true,
+              required: false,
               prefix: "(11)",
             },
           ],
         },
-        { id: "email", label: "Email", type: "email", required: true },
+        { id: "email", label: "Email", type: "email", required: false },
         {
           id: "emailFina",
           label: "Email Financeiro",
           type: "email",
-          required: true,
+          required: false,
         },
       ],
       obs: true,

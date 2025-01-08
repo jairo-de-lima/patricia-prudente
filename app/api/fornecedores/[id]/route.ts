@@ -9,10 +9,19 @@ export async function GET(
     const fornecedor = await prisma.fornecedor.findUnique({
       where: { id: params.id },
     });
-    return NextResponse.json(fornecedor);
+
+    if (!fornecedor) {
+      return NextResponse.json(
+        { error: "Fornecedor não encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(fornecedor, { status: 200 });
   } catch (error) {
+    console.error("Erro ao buscar fornecedor:", error);
     return NextResponse.json(
-      { error: "Error fetching fornecedor" },
+      { error: "Erro ao buscar fornecedor" },
       { status: 500 }
     );
   }
@@ -24,18 +33,43 @@ export async function PUT(
 ) {
   try {
     const data = await request.json();
+
+    // Validar se os campos obrigatórios estão presentes
+    if (!data.comissao || !data.dataRecebimento) {
+      return NextResponse.json(
+        { error: "Campos obrigatórios estão faltando" },
+        { status: 400 }
+      );
+    }
+
+    // Validar tipos de dados
+    const comissao = parseFloat(data.comissao);
+    const dataRecebimento = new Date(data.dataRecebimento);
+
+    if (isNaN(comissao) || isNaN(dataRecebimento.getTime())) {
+      return NextResponse.json(
+        {
+          error:
+            "Dados inválidos: comissao deve ser numérica e dataRecebimento deve ser uma data válida",
+        },
+        { status: 400 }
+      );
+    }
+
     const fornecedor = await prisma.fornecedor.update({
       where: { id: params.id },
       data: {
         ...data,
-        comissao: parseFloat(data.comissao),
-        dataRecebimento: new Date(data.dataRecebimento),
+        comissao,
+        dataRecebimento,
       },
     });
-    return NextResponse.json(fornecedor);
+
+    return NextResponse.json(fornecedor, { status: 200 });
   } catch (error) {
+    console.error("Erro ao atualizar fornecedor:", error);
     return NextResponse.json(
-      { error: "Error updating fornecedor" },
+      { error: "Erro ao atualizar fornecedor" },
       { status: 500 }
     );
   }
@@ -46,13 +80,29 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const fornecedor = await prisma.fornecedor.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!fornecedor) {
+      return NextResponse.json(
+        { error: "Fornecedor não encontrado" },
+        { status: 404 }
+      );
+    }
+
     await prisma.fornecedor.delete({
       where: { id: params.id },
     });
-    return NextResponse.json({ message: "Fornecedor deleted successfully" });
-  } catch (error) {
+
     return NextResponse.json(
-      { error: "Error deleting fornecedor" },
+      { message: "Fornecedor deletado com sucesso" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Erro ao deletar fornecedor:", error);
+    return NextResponse.json(
+      { error: "Erro ao deletar fornecedor" },
       { status: 500 }
     );
   }
