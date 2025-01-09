@@ -18,48 +18,70 @@ import {
 } from "@/app/_components/ui/select";
 import Image from "next/image";
 
-export interface Cliente {
+interface Cliente {
   id: string;
+  dataCad: Date;
   codigo: string;
-  cliente: string;
+  razaoSocial: string;
   cnpj: string;
-  end: string;
-  telFixo?: string;
-  email: string;
-  suframa?: string;
-  transportadora?: string;
   ie: string;
-  cep: string;
-  cel: string;
-  emailFinan: string;
-}
-
-export interface Fornecedor {
-  id: string;
-  codigo: string;
-  fornecedor: string;
-  cnpj: string;
   endereco: string;
-  telFixo?: string;
-  emailPedido?: string;
-  ie: string;
+  endNumero: string;
   cep: string;
-  celular: string;
-  comissao?: number;
-  dataRecebimento?: Date;
-  emailFinan: string;
+  cidade: string;
+  estado: string;
+  telefoneFixo?: string;
+  celular?: string;
+  email?: string;
+  emailFin: string;
+  suframa?: string;
+  transp?: string;
+  tel?: string;
+  NumeroNF?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface Transportadora {
+interface Fornecedor {
   id: string;
+  dataCad: Date;
   codigo: string;
-  transportadora: string;
-  numeroNF: string;
-  descricao?: string;
-  quantidade?: number;
-  valorUn?: number;
-  valorTotal?: number;
-  dataSaida?: Date;
+  razaoSocial: string;
+  cnpj: string;
+  ie: string;
+  endereco: string;
+  endNumero: string;
+  cep: string;
+  telefoneFixo?: string;
+  celular?: string;
+  emailPedido: string;
+  emailFin: string;
+  comissao?: string;
+  dataRecebimento?: Date;
+  obs?: string;
+  NumeroNF?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Transportadora {
+  id: string;
+  dataCad: Date;
+  codigo: string;
+  razaoSocial: string;
+  cnpj: string;
+  ie: string;
+  endereco: string;
+  endNumero: string;
+  cep: string;
+  cidade: string;
+  estado: string;
+  telefoneFixo?: string;
+  celular?: string;
+  email?: string;
+  emailFina?: string;
+  obs?: string;
+  NumeroNF?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -105,22 +127,22 @@ const FilterPage = () => {
     const filtered = data.filter((item) => {
       if ("cliente" in item) {
         return (
-          item.cliente.toLowerCase().includes(lowerSearchTerm) ||
+          item.razaoSocial.toLowerCase().includes(lowerSearchTerm) ||
           item.cnpj.toLowerCase().includes(lowerSearchTerm) ||
           item.codigo.toLowerCase().includes(lowerSearchTerm)
         );
       }
       if ("fornecedor" in item) {
         return (
-          item.fornecedor.toLowerCase().includes(lowerSearchTerm) ||
+          item.razaoSocial.toLowerCase().includes(lowerSearchTerm) ||
           item.cnpj.toLowerCase().includes(lowerSearchTerm) ||
           item.codigo.toLowerCase().includes(lowerSearchTerm)
         );
       }
       if ("transportadora" in item) {
         return (
-          item.transportadora.toLowerCase().includes(lowerSearchTerm) ||
-          item.numeroNF.toLowerCase().includes(lowerSearchTerm) ||
+          item.razaoSocial.toLowerCase().includes(lowerSearchTerm) ||
+          item.NumeroNF?.toLowerCase().includes(lowerSearchTerm) ||
           item.codigo.toLowerCase().includes(lowerSearchTerm)
         );
       }
@@ -187,13 +209,14 @@ const FilterPage = () => {
                     {tipoFiltro === "cliente" && (
                       <>
                         <p>
-                          <strong>Cliente:</strong> {item.cliente}
+                          <strong>Cliente:</strong> {item.razaoSocial}
                         </p>
                         <p>
                           <strong>CNPJ:</strong> {item.cnpj}
                         </p>
                         <p>
-                          <strong>Endereço:</strong> {item.codigo}
+                          <strong>Endereço:</strong> {item.endereco}
+                          {""}N°:{item.endNumero}
                         </p>
                         <p>
                           <strong>Email:</strong> {item.email}
@@ -203,36 +226,37 @@ const FilterPage = () => {
                     {tipoFiltro === "fornecedor" && (
                       <>
                         <p>
-                          <strong>Fornecedor:</strong> {item.fornecedor}
+                          <strong>Fornecedor:</strong> {item.razaoSocial}
                         </p>
                         <p>
                           <strong>CNPJ:</strong> {item.cnpj}
                         </p>
                         <p>
                           <strong>Endereço:</strong> {item.endereco}
+                          {""}N°:{item.endNumero}
                         </p>
                         <p>
-                          <strong>Email:</strong> {item.emailFinan}
+                          <strong>Email:</strong> {item.emailPedido}
                         </p>
                       </>
                     )}
                     {tipoFiltro === "transportadora" && (
                       <>
                         <p>
-                          <strong>Transportadora:</strong> {item.transportadora}
+                          <strong>Transportadora:</strong> {item.razaoSocial}
                         </p>
                         <p>
-                          <strong>Número NF:</strong> {item.numeroNF}
+                          <strong>Número NF:</strong> {item.NumeroNF}
                         </p>
                         <p>
                           <strong>Data de Saída:</strong>{" "}
-                          {item.dataSaida
-                            ? new Date(item.dataSaida).toLocaleDateString()
+                          {item.updatedAt
+                            ? new Date(item.updatedAt).toLocaleDateString()
                             : "Não informado"}
                         </p>
                         <p>
                           <strong>Descrição:</strong>{" "}
-                          {item.descricao || "Não informado"}
+                          {item.obs || "Não informado"}
                         </p>
                       </>
                     )}

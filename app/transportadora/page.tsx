@@ -1,7 +1,9 @@
+"use client";
 import Footer from "../_components/Footer";
 import Navbar from "../_components/Navbar";
 import TransportadoraExport from "./_components/carrier";
 import CarrierPage from "./_components/carrier";
+import FilterAndPDFGenerator from "./_components/filterandpdfgenerate";
 
 // array de fornecedores para depuracao
 const fornecedores = [
@@ -54,7 +56,7 @@ const Carrier = () => {
   return (
     <div>
       <Navbar />
-      <TransportadoraExport />
+      <FilterAndPDFGenerator />
       <Footer />
     </div>
   );

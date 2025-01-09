@@ -11,48 +11,74 @@ import {
   CardHeader,
   CardTitle,
 } from "@/app/_components/ui/card";
+import { handlePreviewPDF, handleExportPDF } from "./pdfGenerator"; // ajuste o caminho conforme necessário
 
 interface Cliente {
   id: string;
+  dataCad: Date;
   codigo: string;
-  cliente: string;
-  cnpj: string;
+  razaoSocial: string;
+  cnpj: string; // Deve ser único
+  ie: string; // Inscrição Estadual, único
   endereco: string;
+  endNumero: string;
   cep: string;
-  emailFin: string;
+  cidade: string;
+  estado: string;
   telefoneFixo?: string;
   celular?: string;
-  email: string;
-  inscEstad: string;
+  email?: string;
+  emailFin: string;
   suframa?: string;
+  transp?: string;
+  tel?: string;
+  NumeroNF?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface Fornecedor {
   id: string;
+  dataCad: Date;
   codigo: string;
-  fornecedor: string;
-  cnpj: string;
+  razaoSocial: string;
+  cnpj: string; // Deve ser único
+  ie: string; // Inscrição Estadual, único
   endereco: string;
-  telefoneFixo?: string;
+  endNumero: string;
   cep: string;
-  emailFin: string;
+  telefoneFixo?: string;
   celular?: string;
   emailPedido: string;
-  inscEstad: string;
-  comissao?: number;
+  emailFin: string;
+  comissao?: string;
   dataRecebimento?: Date;
+  obs?: string;
+  NumeroNF?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface Transportadora {
   id: string;
+  dataCad: Date;
   codigo: string;
-  transportadora: string;
-  numeroNF: string;
-  descricao?: string;
-  quantidade: number;
-  valorUn: number;
-  valorTotal: number;
-  dataSaida?: Date;
+  razaoSocial: string;
+  cnpj: string; // Deve ser único
+  ie: string; // Inscrição Estadual, único
+  endereco: string;
+  endNumero: string;
+  cep: string;
+  cidade: string;
+  estado: string;
+  telefoneFixo?: string;
+  celular?: string;
+  email?: string;
+  emailFina?: string;
+  obs?: string;
+  NumeroNF?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const TransportadoraExport: React.FC = () => {
@@ -92,187 +118,217 @@ const TransportadoraExport: React.FC = () => {
   }, []);
 
   //Função pré visualizar
-  const handlePreviewPDF = () => {
+  // const handlePreviewPDF = () => {
+  //   if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
+  //     alert("Por favor, selecione todos os dados necessários");
+  //     return;
+  //   }
+
+  //   const doc = new jsPDF();
+  //   doc.setFont("helvetica");
+  //   doc.setFontSize(10);
+
+  //   // Cabeçalho
+  //   doc.text(`${selectedFornecedor.razaoSocial}`, 20, 20);
+  //   doc.text(`Pedido nº: ${selectedFornecedor.NumeroNF}`, 150, 20);
+  //   doc.text(
+  //     `${selectedFornecedor.endereco} N°: ${selectedFornecedor.endNumero}`,
+  //     20,
+  //     25
+  //   );
+  //   doc.text(`${selectedFornecedor.cep}`, 150, 25);
+  //   doc.text(
+  //     `${selectedFornecedor.telefoneFixo} / ${selectedFornecedor.celular}`,
+  //     20,
+  //     30
+  //   );
+  //   doc.text(`${selectedFornecedor.emailFin}`, 20, 35);
+
+  //   // Dados do Cliente
+  //   doc.text("CLIENTE:", 20, 75);
+  //   doc.text(`${selectedCliente.cliente}`, 70, 75);
+  //   doc.text(`Código: ${selectedCliente.codigo}`, 20, 80);
+  //   doc.text(`CNPJ: ${selectedCliente.cnpj}`, 20, 85);
+  //   doc.text(`Endereço: ${selectedCliente.endereco}`, 20, 90);
+  //   doc.text(`CEP: ${selectedCliente.cep}`, 150, 90);
+  //   doc.text(`IE: ${selectedCliente.inscEstad}`, 20, 95);
+  //   doc.text(`Suframa: ${selectedCliente.suframa || "Inexistente"}`, 150, 95);
+
+  //   // Dados da Transportadora
+  //   doc.text("TRANSPORTADORA:", 20, 110);
+  //   doc.text(`${selectedTransportadora.transportadora}`, 70, 110);
+  //   doc.text(`NF: ${selectedTransportadora.numeroNF}`, 20, 115);
+  //   doc.text(
+  //     `Data Saída: ${
+  //       selectedTransportadora.dataSaida
+  //         ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
+  //         : ""
+  //     }`,
+  //     150,
+  //     115
+  //   );
+
+  //   // Tabela de Produtos
+  //   const headers = [
+  //     "Código",
+  //     "Descrição do Produto",
+  //     "Unid.",
+  //     "Qtde",
+  //     "Valor Un.",
+  //     "Total",
+  //   ];
+  //   let y = 130;
+
+  //   // Cabeçalho da tabela
+  //   doc.setFillColor(240, 240, 240);
+  //   doc.rect(20, y - 5, 170, 7, "F");
+  //   headers.forEach((header, i) => {
+  //     const x = 20 + i * 28;
+  //     doc.text(header, x, y);
+  //   });
+
+  //   // 4 linhas vazias para preenchimento manual
+  //   for (let i = 0; i < 4; i++) {
+  //     y += 10;
+  //     doc.line(20, y, 190, y);
+  //   }
+
+  //   // Rodapé
+  //   doc.text("VISITEM NOSSO SHOWROOM", 80, 270);
+  //   doc.text("ONE REPRESENTAÇÕES AGRADECE A SUA PREFERÊNCIA !!!", 60, 275);
+  //   doc.text(
+  //     "W W W . O N E R E P R E S E N T A C O E S . C O M . B R",
+  //     60,
+  //     280
+  //   );
+
+  //   // Abrir a pré-visualização em uma nova janela
+  //   window.open(doc.output("bloburl"), "_blank");
+  // };
+
+  // const handleExportPDF = () => {
+  //   if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
+  //     alert("Por favor, selecione todos os dados necessários");
+  //     return;
+  //   }
+
+  //   const doc = new jsPDF();
+  //   doc.setFont("helvetica");
+  //   doc.setFontSize(10);
+
+  //   // Cabeçalho
+  //   doc.text(`${selectedFornecedor.fornecedor}`, 20, 20);
+  //   doc.text(`Pedido nº: ${selectedFornecedor.codigo}`, 150, 20);
+  //   doc.text(`${selectedFornecedor.endereco}`, 20, 25);
+  //   doc.text(`${selectedFornecedor.cep}`, 150, 25);
+  //   doc.text(
+  //     `${selectedFornecedor.telefoneFixo} / ${selectedFornecedor.celular}`,
+  //     20,
+  //     30
+  //   );
+  //   doc.text(`${selectedFornecedor.emailFin}`, 20, 35);
+
+  //   // // Dados do Fornecedor
+  //   // doc.text("FORNECEDOR:", 20, 45);
+  //   // doc.text(`${selectedFornecedor.fornecedor}`, 70, 45);
+  //   // doc.text(`Código: ${selectedFornecedor.codigo}`, 20, 50);
+  //   // doc.text(`CNPJ: ${selectedFornecedor.cnpj}`, 20, 55);
+  //   // doc.text(`Endereço: ${selectedFornecedor.endereco}`, 20, 60);
+  //   // doc.text(`CEP: ${selectedFornecedor.cep}`, 150, 60);
+
+  //   // Dados do Cliente
+  //   doc.text("CLIENTE:", 20, 75);
+  //   doc.text(`${selectedCliente.cliente}`, 70, 75);
+  //   doc.text(`Código: ${selectedCliente.codigo}`, 20, 80);
+  //   doc.text(`CNPJ: ${selectedCliente.cnpj}`, 20, 85);
+  //   doc.text(`Endereço: ${selectedCliente.endereco}`, 20, 90);
+  //   doc.text(`CEP: ${selectedCliente.cep}`, 150, 90);
+  //   doc.text(`IE: ${selectedCliente.inscEstad}`, 20, 95);
+  //   doc.text(`Suframa: ${selectedCliente.suframa || "Inexistente"}`, 150, 95);
+
+  //   // Dados da Transportadora
+  //   doc.text("TRANSPORTADORA:", 20, 110);
+  //   doc.text(`${selectedTransportadora.transportadora}`, 70, 110);
+  //   doc.text(`NF: ${selectedTransportadora.numeroNF}`, 20, 115);
+  //   doc.text(
+  //     `Data Saída: ${
+  //       selectedTransportadora.dataSaida
+  //         ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
+  //         : ""
+  //     }`,
+  //     150,
+  //     115
+  //   );
+
+  //   // Tabela de Produtos
+  //   const headers = [
+  //     "Código",
+  //     "Descrição do Produto",
+  //     "Unid.",
+  //     "Qtde",
+  //     "Valor Un.",
+  //     "Total",
+  //   ];
+  //   let y = 130;
+
+  //   // Cabeçalho da tabela
+  //   doc.setFillColor(240, 240, 240);
+  //   doc.rect(20, y - 5, 170, 7, "F");
+  //   headers.forEach((header, i) => {
+  //     const x = 20 + i * 28;
+  //     doc.text(header, x, y);
+  //   });
+
+  //   // 4 linhas vazias para preenchimento manual
+  //   for (let i = 0; i < 4; i++) {
+  //     y += 10;
+  //     doc.line(20, y, 190, y);
+  //   }
+
+  //   // Adicionando imagem ao PDF a partir da pasta public
+  //   const imageUrl = "/logo.svg"; // Caminho relativo à raiz do projeto
+  //   // const image = await fetch(imageUrl).then((res) => res.blob());
+  //   const reader = new FileReader();
+  //   reader.onload = function () {
+  //     const base64Image = reader.result.split(",")[1];
+  //     doc.addImage(base64Image, "PNG", 150, 10, 50, 30); // Ajuste a posição e o tamanho conforme necessário
+  //     // Footer
+  //     doc.text("VISITEM NOSSO SHOWROOM", 80, 270);
+  //     doc.text("ONE REPRESENTAÇÕES AGRADECE A SUA PREFERÊNCIA !!!", 60, 275);
+  //     doc.text(
+  //       "W W W . O N E R E P R E S E N T A C O E S . C O M . B R",
+  //       60,
+  //       280
+  //     );
+  //     doc.save("pedido.pdf");
+  //   };
+  //   reader.readAsDataURL(image);
+  // };
+
+  const handlePreviewButtonClick = () => {
     if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
       alert("Por favor, selecione todos os dados necessários");
       return;
     }
 
-    const doc = new jsPDF();
-    doc.setFont("helvetica");
-    doc.setFontSize(10);
-
-    // Cabeçalho
-    doc.text(`${selectedFornecedor.fornecedor}`, 20, 20);
-    doc.text(`Pedido nº: ${selectedFornecedor.codigo}`, 150, 20);
-    doc.text(`${selectedFornecedor.endereco}`, 20, 25);
-    doc.text(`${selectedFornecedor.cep}`, 150, 25);
-    doc.text(
-      `${selectedFornecedor.telefoneFixo} / ${selectedFornecedor.celular}`,
-      20,
-      30
+    handlePreviewPDF(
+      selectedCliente,
+      selectedFornecedor,
+      selectedTransportadora
     );
-    doc.text(`${selectedFornecedor.emailFin}`, 20, 35);
-
-    // Dados do Cliente
-    doc.text("CLIENTE:", 20, 75);
-    doc.text(`${selectedCliente.cliente}`, 70, 75);
-    doc.text(`Código: ${selectedCliente.codigo}`, 20, 80);
-    doc.text(`CNPJ: ${selectedCliente.cnpj}`, 20, 85);
-    doc.text(`Endereço: ${selectedCliente.endereco}`, 20, 90);
-    doc.text(`CEP: ${selectedCliente.cep}`, 150, 90);
-    doc.text(`IE: ${selectedCliente.inscEstad}`, 20, 95);
-    doc.text(`Suframa: ${selectedCliente.suframa || "Inexistente"}`, 150, 95);
-
-    // Dados da Transportadora
-    doc.text("TRANSPORTADORA:", 20, 110);
-    doc.text(`${selectedTransportadora.transportadora}`, 70, 110);
-    doc.text(`NF: ${selectedTransportadora.numeroNF}`, 20, 115);
-    doc.text(
-      `Data Saída: ${
-        selectedTransportadora.dataSaida
-          ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
-          : ""
-      }`,
-      150,
-      115
-    );
-
-    // Tabela de Produtos
-    const headers = [
-      "Código",
-      "Descrição do Produto",
-      "Unid.",
-      "Qtde",
-      "Valor Un.",
-      "Total",
-    ];
-    let y = 130;
-
-    // Cabeçalho da tabela
-    doc.setFillColor(240, 240, 240);
-    doc.rect(20, y - 5, 170, 7, "F");
-    headers.forEach((header, i) => {
-      const x = 20 + i * 28;
-      doc.text(header, x, y);
-    });
-
-    // 4 linhas vazias para preenchimento manual
-    for (let i = 0; i < 4; i++) {
-      y += 10;
-      doc.line(20, y, 190, y);
-    }
-
-    // Rodapé
-    doc.text("VISITEM NOSSO SHOWROOM", 80, 270);
-    doc.text("ONE REPRESENTAÇÕES AGRADECE A SUA PREFERÊNCIA !!!", 60, 275);
-    doc.text(
-      "W W W . O N E R E P R E S E N T A C O E S . C O M . B R",
-      60,
-      280
-    );
-
-    // Abrir a pré-visualização em uma nova janela
-    window.open(doc.output("bloburl"), "_blank");
   };
 
-  const handleExportPDF = () => {
+  const handleExportButtonClick = () => {
     if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
       alert("Por favor, selecione todos os dados necessários");
       return;
     }
 
-    const doc = new jsPDF();
-    doc.setFont("helvetica");
-    doc.setFontSize(10);
-
-    // Cabeçalho
-    doc.text(`${selectedFornecedor.fornecedor}`, 20, 20);
-    doc.text(`Pedido nº: ${selectedFornecedor.codigo}`, 150, 20);
-    doc.text(`${selectedFornecedor.endereco}`, 20, 25);
-    doc.text(`${selectedFornecedor.cep}`, 150, 25);
-    doc.text(
-      `${selectedFornecedor.telefoneFixo} / ${selectedFornecedor.celular}`,
-      20,
-      30
+    handleExportPDF(
+      selectedCliente,
+      selectedFornecedor,
+      selectedTransportadora
     );
-    doc.text(`${selectedFornecedor.emailFin}`, 20, 35);
-
-    // // Dados do Fornecedor
-    // doc.text("FORNECEDOR:", 20, 45);
-    // doc.text(`${selectedFornecedor.fornecedor}`, 70, 45);
-    // doc.text(`Código: ${selectedFornecedor.codigo}`, 20, 50);
-    // doc.text(`CNPJ: ${selectedFornecedor.cnpj}`, 20, 55);
-    // doc.text(`Endereço: ${selectedFornecedor.endereco}`, 20, 60);
-    // doc.text(`CEP: ${selectedFornecedor.cep}`, 150, 60);
-
-    // Dados do Cliente
-    doc.text("CLIENTE:", 20, 75);
-    doc.text(`${selectedCliente.cliente}`, 70, 75);
-    doc.text(`Código: ${selectedCliente.codigo}`, 20, 80);
-    doc.text(`CNPJ: ${selectedCliente.cnpj}`, 20, 85);
-    doc.text(`Endereço: ${selectedCliente.endereco}`, 20, 90);
-    doc.text(`CEP: ${selectedCliente.cep}`, 150, 90);
-    doc.text(`IE: ${selectedCliente.inscEstad}`, 20, 95);
-    doc.text(`Suframa: ${selectedCliente.suframa || "Inexistente"}`, 150, 95);
-
-    // Dados da Transportadora
-    doc.text("TRANSPORTADORA:", 20, 110);
-    doc.text(`${selectedTransportadora.transportadora}`, 70, 110);
-    doc.text(`NF: ${selectedTransportadora.numeroNF}`, 20, 115);
-    doc.text(
-      `Data Saída: ${
-        selectedTransportadora.dataSaida
-          ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
-          : ""
-      }`,
-      150,
-      115
-    );
-
-    // Tabela de Produtos
-    const headers = [
-      "Código",
-      "Descrição do Produto",
-      "Unid.",
-      "Qtde",
-      "Valor Un.",
-      "Total",
-    ];
-    let y = 130;
-
-    // Cabeçalho da tabela
-    doc.setFillColor(240, 240, 240);
-    doc.rect(20, y - 5, 170, 7, "F");
-    headers.forEach((header, i) => {
-      const x = 20 + i * 28;
-      doc.text(header, x, y);
-    });
-
-    // 4 linhas vazias para preenchimento manual
-    for (let i = 0; i < 4; i++) {
-      y += 10;
-      doc.line(20, y, 190, y);
-    }
-
-    // Adicionando imagem ao PDF a partir da pasta public
-    const imageUrl = "/logo.svg"; // Caminho relativo à raiz do projeto
-    // const image = await fetch(imageUrl).then((res) => res.blob());
-    const reader = new FileReader();
-    reader.onload = function () {
-      const base64Image = reader.result.split(",")[1];
-      doc.addImage(base64Image, "PNG", 150, 10, 50, 30); // Ajuste a posição e o tamanho conforme necessário
-      // Footer
-      doc.text("VISITEM NOSSO SHOWROOM", 80, 270);
-      doc.text("ONE REPRESENTAÇÕES AGRADECE A SUA PREFERÊNCIA !!!", 60, 275);
-      doc.text(
-        "W W W . O N E R E P R E S E N T A C O E S . C O M . B R",
-        60,
-        280
-      );
-      doc.save("pedido.pdf");
-    };
-    reader.readAsDataURL(image);
   };
 
   const handleExportXLSX = () => {
@@ -293,7 +349,7 @@ const TransportadoraExport: React.FC = () => {
       // ["Fones: (0xx11) 3313-7217 / (0xx11) 3313-7741", "", "", "", ""],
       // ["email: financeiro@onerepresentacoes.com.br", "", "", "", ""],
       [""],
-      ["FORNECEDOR:", selectedFornecedor.fornecedor, "", "", ""],
+      ["FORNECEDOR:", selectedFornecedor.razaoSocial, "", "", ""],
       [
         "Código:",
         selectedFornecedor.codigo,
@@ -309,24 +365,24 @@ const TransportadoraExport: React.FC = () => {
         "",
       ],
       [""],
-      ["CLIENTE:", selectedCliente.cliente, "", "", ""],
+      ["CLIENTE:", selectedCliente.razaoSocial, "", "", ""],
       ["Código:", selectedCliente.codigo, "CNPJ:", selectedCliente.cnpj, ""],
       ["Endereço:", selectedCliente.endereco, "CEP:", selectedCliente.cep, ""],
       [
         "IE:",
-        selectedCliente.inscEstad,
+        selectedCliente.ie,
         "Suframa:",
         selectedCliente.suframa || "Inexistente",
         "",
       ],
       [""],
-      ["TRANSPORTADORA:", selectedTransportadora.transportadora, "", "", ""],
+      ["TRANSPORTADORA:", selectedTransportadora.razaoSocial, "", "", ""],
       [
         "NF:",
-        selectedTransportadora.numeroNF,
+        selectedTransportadora.NumeroNF,
         "Data Saída:",
-        selectedTransportadora.dataSaida
-          ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
+        selectedTransportadora.dataCad
+          ? format(new Date(selectedTransportadora.dataCad), "dd/MM/yyyy")
           : "",
         "",
       ],
@@ -367,7 +423,7 @@ const TransportadoraExport: React.FC = () => {
           <CardContent>
             <select
               className="w-full p-2 border rounded-md"
-              value={selectedFornecedor?.id || ""}
+              value={selectedFornecedor?.razaoSocial || ""}
               onChange={(e) =>
                 setSelectedFornecedor(
                   fornecedores.find((f) => f.id === e.target.value) || null
@@ -377,7 +433,7 @@ const TransportadoraExport: React.FC = () => {
               <option value="">Selecione um fornecedor</option>
               {fornecedores.map((fornecedor) => (
                 <option key={fornecedor.id} value={fornecedor.id}>
-                  {fornecedor.fornecedor} - {fornecedor.codigo}
+                  {fornecedor.razaoSocial} - {fornecedor.codigo}
                 </option>
               ))}
             </select>
@@ -392,7 +448,7 @@ const TransportadoraExport: React.FC = () => {
           <CardContent>
             <select
               className="w-full p-2 border rounded-md"
-              value={selectedCliente?.id || ""}
+              value={selectedCliente?.razaoSocial || ""}
               onChange={(e) =>
                 setSelectedCliente(
                   clientes.find((c) => c.id === e.target.value) || null
@@ -402,7 +458,7 @@ const TransportadoraExport: React.FC = () => {
               <option value="">Selecione um cliente</option>
               {clientes.map((cliente) => (
                 <option key={cliente.id} value={cliente.id}>
-                  {cliente.cliente} - {cliente.codigo}
+                  {cliente.razaoSocial} - {cliente.codigo}
                 </option>
               ))}
             </select>
@@ -417,7 +473,7 @@ const TransportadoraExport: React.FC = () => {
           <CardContent>
             <select
               className="w-full p-2 border rounded-md"
-              value={selectedTransportadora?.id || ""}
+              value={selectedTransportadora?.razaoSocial || ""}
               onChange={(e) =>
                 setSelectedTransportadora(
                   transportadoras.find((t) => t.id === e.target.value) || null
@@ -427,8 +483,7 @@ const TransportadoraExport: React.FC = () => {
               <option value="">Selecione uma transportadora</option>
               {transportadoras.map((transportadora) => (
                 <option key={transportadora.id} value={transportadora.id}>
-                  {transportadora.transportadora} - NF:{" "}
-                  {transportadora.numeroNF}
+                  {transportadora.razaoSocial} - NF: {transportadora.NumeroNF}
                 </option>
               ))}
             </select>
@@ -450,7 +505,7 @@ const TransportadoraExport: React.FC = () => {
               </CardHeader>
 
               <CardContent>
-                <p>{selectedFornecedor.fornecedor}</p>
+                <p>{selectedFornecedor.razaoSocial}</p>
                 <p>Código: {selectedFornecedor.codigo}</p>
                 <p>CNPJ: {selectedFornecedor.cnpj}</p>
               </CardContent>
@@ -463,7 +518,7 @@ const TransportadoraExport: React.FC = () => {
                 <CardTitle>Cliente:</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>{selectedCliente.cliente}</p>
+                <p>{selectedCliente.razaoSocial}</p>
                 <p>Código: {selectedCliente.codigo}</p>
                 <p>CNPJ: {selectedCliente.cnpj}</p>
               </CardContent>
@@ -475,13 +530,13 @@ const TransportadoraExport: React.FC = () => {
                 <CardTitle>Transportadora:</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>{selectedTransportadora.transportadora}</p>
-                <p>NF: {selectedTransportadora.numeroNF}</p>
+                <p>{selectedTransportadora.razaoSocial}</p>
+                <p>{selectedTransportadora.NumeroNF}</p>
                 <p>
                   Data:{" "}
-                  {selectedTransportadora.dataSaida
+                  {selectedTransportadora.dataCad
                     ? format(
-                        new Date(selectedTransportadora.dataSaida),
+                        new Date(selectedTransportadora.dataCad),
                         "dd/MM/yyyy"
                       )
                     : "Não definida"}
@@ -495,7 +550,7 @@ const TransportadoraExport: React.FC = () => {
       {/* Botões de Exportação */}
       <div className="flex gap-4 justify-end">
         <Button
-          onClick={handlePreviewPDF}
+          onClick={handlePreviewButtonClick}
           className="disabled:opacity-50"
           disabled={
             !selectedCliente || !selectedFornecedor || !selectedTransportadora
@@ -504,7 +559,7 @@ const TransportadoraExport: React.FC = () => {
           Pré-visualizar PDF
         </Button>
         <Button
-          onClick={handleExportPDF}
+          onClick={handleExportButtonClick}
           className="disabled:opacity-50"
           disabled={
             !selectedCliente || !selectedFornecedor || !selectedTransportadora

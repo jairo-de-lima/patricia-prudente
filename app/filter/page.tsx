@@ -1,6 +1,7 @@
 import Footer from "../_components/Footer";
 import Navbar from "../_components/Navbar";
 import FilterPage from "./_components/Filter";
+import FilterAndPDFGenerator from "./_components/FilterAndPDFGenerator";
 
 // Dados de exemplo
 // const fornecedores = [
@@ -22,7 +23,7 @@ const Filter = () => {
   return (
     <div>
       <Navbar />
-      <FilterPage
+      <FilterAndPDFGenerator
       // fornecedores={fornecedores}
       // clientes={clientes}
       // transportadoras={transportadoras}
