@@ -18,7 +18,7 @@ const FormHeader = ({ formType, setFormType }: FormHeaderProps) => (
       />
       <FormSelector value={formType} onValueChange={setFormType} />
     </div>
-    <h2 className="text-center text-2xl font-bold">Ass: Patrícia Prudente</h2>
+    <h2 className="text-center text-2xl font-bold">Patrícia Prudente</h2>
     <div className="text-center text-lg text-gray-600">
       Representante Comercial
     </div>
