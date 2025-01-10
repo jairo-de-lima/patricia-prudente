@@ -165,6 +165,7 @@ export default function FilterAndPDFGenerator() {
             )}
           </CardContent>
         </Card>
+
         <PDFPreviewModal
           isOpen={isPreviewOpen}
           onClose={handleClosePreview}

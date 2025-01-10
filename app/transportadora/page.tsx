@@ -4,6 +4,7 @@ import Navbar from "../_components/Navbar";
 import TransportadoraExport from "./_components/carrier";
 import CarrierPage from "./_components/carrier";
 import FilterAndPDFGenerator from "./_components/filterandpdfgenerate";
+import NovoPedido from "./teste/fetch";
 
 // array de fornecedores para depuracao
 const fornecedores = [
@@ -56,7 +57,8 @@ const Carrier = () => {
   return (
     <div>
       <Navbar />
-      <FilterAndPDFGenerator />
+      {/* <CarrierPage /> */}
+      <NovoPedido />
       <Footer />
     </div>
   );

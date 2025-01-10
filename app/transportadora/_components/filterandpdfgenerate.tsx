@@ -1,450 +1,529 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/app/_components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/_components/ui/select";
-import { Button } from "@/app/_components/ui/button";
-import { PDFDocument } from "pdf-lib";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
+import { jsPDF } from "jspdf";
 import { format } from "date-fns";
+import { Button } from "@/app/_components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/app/_components/ui/card";
 
-// Types mantidos os mesmos...
 interface Cliente {
   id: string;
-  dataCad: Date;
   codigo: string;
-  razaoSocial: string;
+  cliente: string;
   cnpj: string;
-  ie: string;
   endereco: string;
-  endNumero: string;
   cep: string;
-  cidade: string;
-  estado: string;
+  emailFin: string;
   telefoneFixo?: string;
   celular?: string;
-  email?: string;
-  emailFin: string;
+  email: string;
+  inscEstad: string;
   suframa?: string;
-  transp?: string;
-  tel?: string;
-  NumeroNF?: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 interface Fornecedor {
   id: string;
-  dataCad: Date;
   codigo: string;
-  razaoSocial: string;
+  fornecedor: string;
   cnpj: string;
-  ie: string;
   endereco: string;
-  endNumero: string;
-  cep: string;
   telefoneFixo?: string;
+  cep: string;
+  emailFin: string;
   celular?: string;
   emailPedido: string;
-  emailFin: string;
-  comissao?: string;
+  inscEstad: string;
+  comissao?: number;
   dataRecebimento?: Date;
-  obs?: string;
-  NumeroNF?: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 interface Transportadora {
   id: string;
-  dataCad: Date;
   codigo: string;
-  razaoSocial: string;
-  cnpj: string;
-  ie: string;
-  endereco: string;
-  endNumero: string;
-  cep: string;
-  cidade: string;
-  estado: string;
-  telefoneFixo?: string;
-  celular?: string;
-  email?: string;
-  emailFina?: string;
-  obs?: string;
-  NumeroNF?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  transportadora: string;
+  numeroNF: string;
+  descricao?: string;
+  quantidade: number;
+  valorUn: number;
+  valorTotal: number;
+  dataSaida?: Date;
 }
 
-const FilterAndPDFGenerator = () => {
-  const [selectedType, setSelectedType] = useState<string>("clientes");
+const TransportadoraExport: React.FC = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
   const [transportadoras, setTransportadoras] = useState<Transportadora[]>([]);
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // Funções separadas para buscar cada tipo de dado
-  const fetchClientes = async () => {
-    try {
-      const response = await fetch("/api/clientes");
-      if (!response.ok) throw new Error("Erro ao carregar clientes");
-      const data = await response.json();
-      setClientes(data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Erro ao carregar clientes"
-      );
-    }
-  };
-
-  const fetchFornecedores = async () => {
-    try {
-      const response = await fetch("/api/fornecedores");
-      if (!response.ok) throw new Error("Erro ao carregar fornecedores");
-      const data = await response.json();
-      setFornecedores(data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Erro ao carregar fornecedores"
-      );
-    }
-  };
-
-  const fetchTransportadoras = async () => {
-    try {
-      const response = await fetch("/api/transportadora");
-      if (!response.ok) throw new Error("Erro ao carregar transportadoras");
-      const data = await response.json();
-      setTransportadoras(data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Erro ao carregar transportadoras"
-      );
-    }
-  };
-
-  // Função para carregar dados baseado no tipo selecionado
-  const loadData = async () => {
-    setLoading(true);
-    setError(null);
-    setSelectedItems([]);
-
-    try {
-      if (selectedType === "clientes") {
-        await fetchClientes();
-      } else if (selectedType === "fornecedores") {
-        await fetchFornecedores();
-      } else if (selectedType === "transportadoras") {
-        await fetchTransportadoras();
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [selectedFornecedor, setSelectedFornecedor] =
+    useState<Fornecedor | null>(null);
+  const [selectedTransportadora, setSelectedTransportadora] =
+    useState<Transportadora | null>(null);
 
   useEffect(() => {
-    loadData();
-  }, [selectedType]);
+    const fetchData = async () => {
+      try {
+        const [clientesRes, fornecedoresRes, transportadorasRes] =
+          await Promise.all([
+            fetch("/api/clientes"),
+            fetch("/api/fornecedores"),
+            fetch("/api/transportadora"),
+          ]);
 
-  // Função para gerar PDF
-  const generatePDF = async () => {
-    try {
-      const pdfDoc = await PDFDocument.create();
-      let page = pdfDoc.addPage([595.276, 841.89]); // A4
-      const font = await pdfDoc.embedFont("Helvetica");
+        const clientesData = await clientesRes.json();
+        const fornecedoresData = await fornecedoresRes.json();
+        const transportadorasData = await transportadorasRes.json();
 
-      // Carregar e adicionar a logo PNG
-      const logoResponse = await fetch("/logo.png");
-      const logoArrayBuffer = await logoResponse.arrayBuffer();
-      const logoImage = await pdfDoc.embedPng(logoArrayBuffer);
-
-      // Dimensões e posição da logo
-      const logoWidth = 80; // Largura da logo
-      const logoHeight = 50; // Altura da logo
-      const logoX = 50; // Posição X da logo
-      const logoY = page.getHeight() - 100; // Posição Y da logo
-
-      page.drawImage(logoImage, {
-        x: logoX,
-        y: logoY,
-        width: logoWidth,
-        height: logoHeight,
-      });
-
-      // Texto ao lado da logo
-      const nameX = logoX + logoWidth + 50; // Posição X do nome, ao lado da logo
-      const nameY = logoY + logoHeight - 15; // Centralizado verticalmente com a logo
-
-      page.drawText("Patricia Prudente", {
-        x: nameX,
-        y: nameY,
-        size: 14,
-        font,
-      });
-
-      page.drawText("representante comercial", {
-        x: nameX,
-        y: nameY - 18, // Abaixo do nome
-        size: 10,
-        font,
-      });
-
-      // Centralizar o cabeçalho "Cadastro de Clientes"
-      const headerText =
-        selectedType === "clientes"
-          ? "Cadastro de Cliente"
-          : selectedType === "fornecedores"
-          ? "Cadastro de Fornecedor"
-          : "Cadastro de Transportadora";
-
-      const headerFontSize = 14;
-      const textWidth = font.widthOfTextAtSize(headerText, headerFontSize);
-      const headerX = (page.getWidth() - textWidth) / 2; // Centraliza horizontalmente
-      const headerY = logoY - 50; // Abaixo da logo
-
-      page.drawText(headerText, {
-        x: headerX,
-        y: headerY,
-        size: headerFontSize,
-        font,
-      });
-
-      let yPosition = headerY - 50; // Posição inicial do conteúdo
-
-      const drawField = (
-        label: string,
-        value: string | undefined,
-        y: number
-      ) => {
-        page.drawText(`${label}:`, {
-          x: 50,
-          y,
-          size: 12,
-        });
-        page.drawText(value || "_________________", {
-          x: 200,
-          y,
-          size: 12,
-        });
-      };
-
-      // Obter os dados selecionados com base no tipo
-      let selectedData: any[] = [];
-      if (selectedType === "clientes") {
-        selectedData = clientes.filter((item) =>
-          selectedItems.includes(item.id)
-        );
-      } else if (selectedType === "fornecedores") {
-        selectedData = fornecedores.filter((item) =>
-          selectedItems.includes(item.id)
-        );
-      } else if (selectedType === "transportadoras") {
-        selectedData = transportadoras.filter((item) =>
-          selectedItems.includes(item.id)
-        );
+        setClientes(clientesData);
+        setFornecedores(fornecedoresData);
+        setTransportadoras(transportadorasData);
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
       }
+    };
 
-      selectedData.forEach((item) => {
-        yPosition -= 30;
+    fetchData();
+  }, []);
 
-        // Campos comuns
-        drawField(
-          "Data Cad",
-          format(new Date(item.dataCad), "dd/MM/yyyy"),
-          yPosition
-        );
-        yPosition -= 25;
-        drawField("Código", item.codigo, yPosition);
-        yPosition -= 25;
-        drawField("Razão Social", item.razaoSocial, yPosition);
-        yPosition -= 25;
-        drawField("CNPJ", item.cnpj, yPosition);
-        yPosition -= 25;
-        drawField("IE", item.ie, yPosition);
-        yPosition -= 25;
-        drawField("Endereço", `${item.endereco}, ${item.endNumero}`, yPosition);
-        yPosition -= 25;
-        drawField("CEP", item.cep, yPosition);
-        yPosition -= 25;
-        drawField("Telefone Fixo", item.telefoneFixo || "", yPosition);
-        yPosition -= 25;
-        drawField("Celular", item.celular || "", yPosition);
-        yPosition -= 25;
-
-        // Campos específicos por tipo
-        if (selectedType === "clientes") {
-          drawField("Email", (item as Cliente).email || "", yPosition);
-          yPosition -= 25;
-          drawField("Email Financeiro", (item as Cliente).emailFin, yPosition);
-          yPosition -= 25;
-          drawField("Suframa", (item as Cliente).suframa || "", yPosition);
-          yPosition -= 25;
-          drawField(
-            "Transportadora",
-            (item as Cliente).transp || "",
-            yPosition
-          );
-          yPosition -= 25;
-        } else if (selectedType === "fornecedores") {
-          drawField(
-            "Email Pedido",
-            (item as Fornecedor).emailPedido,
-            yPosition
-          );
-          yPosition -= 25;
-          drawField(
-            "Email Financeiro",
-            (item as Fornecedor).emailFin,
-            yPosition
-          );
-          yPosition -= 25;
-          drawField("Comissão", (item as Fornecedor).comissao || "", yPosition);
-          yPosition -= 25;
-          if ((item as Fornecedor).dataRecebimento) {
-            drawField(
-              "Data Recebimento",
-              format(
-                new Date((item as Fornecedor).dataRecebimento!),
-                "dd/MM/yyyy"
-              ),
-              yPosition
-            );
-            yPosition -= 25;
-          }
-        } else if (selectedType === "transportadoras") {
-          drawField("Email", (item as Transportadora).email || "", yPosition);
-          yPosition -= 25;
-          drawField(
-            "Email Financeiro",
-            (item as Transportadora).emailFina || "",
-            yPosition
-          );
-          yPosition -= 25;
-          drawField("Cidade", (item as Transportadora).cidade, yPosition);
-          yPosition -= 25;
-          drawField("Estado", (item as Transportadora).estado, yPosition);
-          yPosition -= 25;
-        }
-
-        // Adiciona nova página se necessário
-        if (yPosition < 100) {
-          const newPage = pdfDoc.addPage([595.276, 841.89]);
-          page = newPage;
-          yPosition = 750;
-        }
-      });
-
-      // Gerar e fazer download do PDF
-      const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `cadastro_${selectedType}_${new Date().getTime()}.pdf`;
-      link.click();
-
-      // Limpar URL após download
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
-      setError("Erro ao gerar o PDF. Por favor, tente novamente.");
+  //Função pré visualizar
+  const handlePreviewPDF = () => {
+    if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
+      alert("Por favor, selecione todos os dados necessários");
+      return;
     }
+
+    const doc = new jsPDF();
+    doc.setFont("helvetica");
+    doc.setFontSize(10);
+
+    // Cabeçalho
+    doc.text(`${selectedFornecedor.fornecedor}`, 20, 20);
+    doc.text(`Pedido nº: ${selectedFornecedor.codigo}`, 150, 20);
+    doc.text(`${selectedFornecedor.endereco}`, 20, 25);
+    doc.text(`${selectedFornecedor.cep}`, 150, 25);
+    doc.text(
+      `${selectedFornecedor.telefoneFixo} / ${selectedFornecedor.celular}`,
+      20,
+      30
+    );
+    doc.text(`${selectedFornecedor.emailFin}`, 20, 35);
+
+    // Dados do Cliente
+    doc.text("CLIENTE:", 20, 75);
+    doc.text(`${selectedCliente.cliente}`, 70, 75);
+    doc.text(`Código: ${selectedCliente.codigo}`, 20, 80);
+    doc.text(`CNPJ: ${selectedCliente.cnpj}`, 20, 85);
+    doc.text(`Endereço: ${selectedCliente.endereco}`, 20, 90);
+    doc.text(`CEP: ${selectedCliente.cep}`, 150, 90);
+    doc.text(`IE: ${selectedCliente.inscEstad}`, 20, 95);
+    doc.text(`Suframa: ${selectedCliente.suframa || "Inexistente"}`, 150, 95);
+
+    // Dados da Transportadora
+    doc.text("TRANSPORTADORA:", 20, 110);
+    doc.text(`${selectedTransportadora.transportadora}`, 70, 110);
+    doc.text(`NF: ${selectedTransportadora.numeroNF}`, 20, 115);
+    doc.text(
+      `Data Saída: ${
+        selectedTransportadora.dataSaida
+          ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
+          : ""
+      }`,
+      150,
+      115
+    );
+
+    // Tabela de Produtos
+    const headers = [
+      "Código",
+      "Descrição do Produto",
+      "Unid.",
+      "Qtde",
+      "Valor Un.",
+      "Total",
+    ];
+    let y = 130;
+
+    // Cabeçalho da tabela
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, y - 5, 170, 7, "F");
+    headers.forEach((header, i) => {
+      const x = 20 + i * 28;
+      doc.text(header, x, y);
+    });
+
+    // 4 linhas vazias para preenchimento manual
+    for (let i = 0; i < 4; i++) {
+      y += 10;
+      doc.line(20, y, 190, y);
+    }
+
+    // Rodapé
+    doc.text("VISITEM NOSSO SHOWROOM", 80, 270);
+    doc.text("ONE REPRESENTAÇÕES AGRADECE A SUA PREFERÊNCIA !!!", 60, 275);
+    doc.text(
+      "W W W . O N E R E P R E S E N T A C O E S . C O M . B R",
+      60,
+      280
+    );
+
+    // Abrir a pré-visualização em uma nova janela
+    window.open(doc.output("bloburl"), "_blank");
   };
 
-  // Obter dados atuais baseado no tipo selecionado
-  const getCurrentData = () => {
-    if (selectedType === "clientes") return clientes;
-    if (selectedType === "fornecedores") return fornecedores;
-    if (selectedType === "transportadoras") return transportadoras;
-    return [];
+  const handleExportPDF = () => {
+    if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
+      alert("Por favor, selecione todos os dados necessários");
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.setFont("helvetica");
+    doc.setFontSize(10);
+
+    // Cabeçalho
+    doc.text(`${selectedFornecedor.fornecedor}`, 20, 20);
+    doc.text(`Pedido nº: ${selectedFornecedor.codigo}`, 150, 20);
+    doc.text(`${selectedFornecedor.endereco}`, 20, 25);
+    doc.text(`${selectedFornecedor.cep}`, 150, 25);
+    doc.text(
+      `${selectedFornecedor.telefoneFixo} / ${selectedFornecedor.celular}`,
+      20,
+      30
+    );
+    doc.text(`${selectedFornecedor.emailFin}`, 20, 35);
+
+    // // Dados do Fornecedor
+    // doc.text("FORNECEDOR:", 20, 45);
+    // doc.text(`${selectedFornecedor.fornecedor}`, 70, 45);
+    // doc.text(`Código: ${selectedFornecedor.codigo}`, 20, 50);
+    // doc.text(`CNPJ: ${selectedFornecedor.cnpj}`, 20, 55);
+    // doc.text(`Endereço: ${selectedFornecedor.endereco}`, 20, 60);
+    // doc.text(`CEP: ${selectedFornecedor.cep}`, 150, 60);
+
+    // Dados do Cliente
+    doc.text("CLIENTE:", 20, 75);
+    doc.text(`${selectedCliente.cliente}`, 70, 75);
+    doc.text(`Código: ${selectedCliente.codigo}`, 20, 80);
+    doc.text(`CNPJ: ${selectedCliente.cnpj}`, 20, 85);
+    doc.text(`Endereço: ${selectedCliente.endereco}`, 20, 90);
+    doc.text(`CEP: ${selectedCliente.cep}`, 150, 90);
+    doc.text(`IE: ${selectedCliente.inscEstad}`, 20, 95);
+    doc.text(`Suframa: ${selectedCliente.suframa || "Inexistente"}`, 150, 95);
+
+    // Dados da Transportadora
+    doc.text("TRANSPORTADORA:", 20, 110);
+    doc.text(`${selectedTransportadora.transportadora}`, 70, 110);
+    doc.text(`NF: ${selectedTransportadora.numeroNF}`, 20, 115);
+    doc.text(
+      `Data Saída: ${
+        selectedTransportadora.dataSaida
+          ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
+          : ""
+      }`,
+      150,
+      115
+    );
+
+    // Tabela de Produtos
+    const headers = [
+      "Código",
+      "Descrição do Produto",
+      "Unid.",
+      "Qtde",
+      "Valor Un.",
+      "Total",
+    ];
+    let y = 130;
+
+    // Cabeçalho da tabela
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, y - 5, 170, 7, "F");
+    headers.forEach((header, i) => {
+      const x = 20 + i * 28;
+      doc.text(header, x, y);
+    });
+
+    // 4 linhas vazias para preenchimento manual
+    for (let i = 0; i < 4; i++) {
+      y += 10;
+      doc.line(20, y, 190, y);
+    }
+
+    // Adicionando imagem ao PDF a partir da pasta public
+    const imageUrl = "/logo.svg"; // Caminho relativo à raiz do projeto
+    // const image = await fetch(imageUrl).then((res) => res.blob());
+    const reader = new FileReader();
+    reader.onload = function () {
+      // const base64Image = reader.result.split(",")[1];
+      // doc.addImage(base64Image, "PNG", 150, 10, 50, 30); // Ajuste a posição e o tamanho conforme necessário
+      // Footer
+      doc.text("VISITEM NOSSO SHOWROOM", 80, 270);
+      doc.text("ONE REPRESENTAÇÕES AGRADECE A SUA PREFERÊNCIA !!!", 60, 275);
+      doc.text(
+        "W W W . O N E R E P R E S E N T A C O E S . C O M . B R",
+        60,
+        280
+      );
+      doc.save("pedido.pdf");
+    };
+    // reader.readAsDataURL(image);
+  };
+
+  const handleExportXLSX = () => {
+    if (!selectedCliente || !selectedFornecedor || !selectedTransportadora) {
+      alert("Por favor, selecione todos os dados necessários");
+      return;
+    }
+
+    const headerData = [
+      // [
+      //   "ONE REPRESENTAÇÕES",
+      //   "",
+      //   "",
+      //   `Pedido nº: ${selectedTransportadora.codigo}`,
+      //   "",
+      // ],
+      // ["Av. Prestes Maia 702 - 6º And Sl 61", "", "", "CEP:01031-000", ""],
+      // ["Fones: (0xx11) 3313-7217 / (0xx11) 3313-7741", "", "", "", ""],
+      // ["email: financeiro@onerepresentacoes.com.br", "", "", "", ""],
+      [""],
+      ["FORNECEDOR:", selectedFornecedor.fornecedor, "", "", ""],
+      [
+        "Código:",
+        selectedFornecedor.codigo,
+        "CNPJ:",
+        selectedFornecedor.cnpj,
+        "",
+      ],
+      [
+        "Endereço:",
+        selectedFornecedor.endereco,
+        "CEP:",
+        selectedFornecedor.cep,
+        "",
+      ],
+      [""],
+      ["CLIENTE:", selectedCliente.cliente, "", "", ""],
+      ["Código:", selectedCliente.codigo, "CNPJ:", selectedCliente.cnpj, ""],
+      ["Endereço:", selectedCliente.endereco, "CEP:", selectedCliente.cep, ""],
+      [
+        "IE:",
+        selectedCliente.inscEstad,
+        "Suframa:",
+        selectedCliente.suframa || "Inexistente",
+        "",
+      ],
+      [""],
+      ["TRANSPORTADORA:", selectedTransportadora.transportadora, "", "", ""],
+      [
+        "NF:",
+        selectedTransportadora.numeroNF,
+        "Data Saída:",
+        selectedTransportadora.dataSaida
+          ? format(new Date(selectedTransportadora.dataSaida), "dd/MM/yyyy")
+          : "",
+        "",
+      ],
+      [""],
+      ["Código", "Descrição do Produto", "Unid.", "Qtde", "Valor Un.", "Total"],
+      ["", "", "", "", "", ""],
+      ["", "", "", "", "", ""],
+      ["", "", "", "", "", ""],
+      ["", "", "", "", "", ""],
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(headerData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Pedido");
+
+    ws["!cols"] = [
+      { wch: 15 },
+      { wch: 40 },
+      { wch: 8 },
+      { wch: 10 },
+      { wch: 12 },
+      { wch: 12 },
+    ];
+
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const file = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(file, "pedido.xlsx");
   };
 
   return (
-    <Card className="w-full max-w-6xl mx-auto p-6">
-      <CardContent>
-        <div className="space-y-6">
-          <div className="flex items-center gap-4">
-            <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="clientes">Clientes</SelectItem>
-                <SelectItem value="fornecedores">Fornecedores</SelectItem>
-                <SelectItem value="transportadoras">Transportadoras</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button
-              onClick={generatePDF}
-              disabled={selectedItems.length === 0 || loading}
+    <div className="p-6 min-h-screen">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Seleção de Fornecedor */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Fornecedor</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <select
+              className="w-full p-2 border rounded-md"
+              value={selectedFornecedor?.id || ""}
+              onChange={(e) =>
+                setSelectedFornecedor(
+                  fornecedores.find((f) => f.id === e.target.value) || null
+                )
+              }
             >
-              Gerar PDF
-            </Button>
+              <option value="">Selecione um fornecedor</option>
+              {fornecedores.map((fornecedor) => (
+                <option key={fornecedor.id} value={fornecedor.id}>
+                  {fornecedor.fornecedor} - {fornecedor.codigo}
+                </option>
+              ))}
+            </select>
+          </CardContent>
+        </Card>
 
-            <Button onClick={loadData} variant="outline">
-              Atualizar dados
-            </Button>
-          </div>
+        {/* Seleção de Cliente */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Cliente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <select
+              className="w-full p-2 border rounded-md"
+              value={selectedCliente?.id || ""}
+              onChange={(e) =>
+                setSelectedCliente(
+                  clientes.find((c) => c.id === e.target.value) || null
+                )
+              }
+            >
+              <option value="">Selecione um cliente</option>
+              {clientes.map((cliente) => (
+                <option key={cliente.id} value={cliente.id}>
+                  {cliente.cliente} - {cliente.codigo}
+                </option>
+              ))}
+            </select>
+          </CardContent>
+        </Card>
 
-          {error && (
-            <div className="text-red-500 p-4 rounded bg-red-50">{error}</div>
+        {/* Seleção de Transportadora */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Transportadora</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <select
+              className="w-full p-2 border rounded-md"
+              value={selectedTransportadora?.id || ""}
+              onChange={(e) =>
+                setSelectedTransportadora(
+                  transportadoras.find((t) => t.id === e.target.value) || null
+                )
+              }
+            >
+              <option value="">Selecione uma transportadora</option>
+              {transportadoras.map((transportadora) => (
+                <option key={transportadora.id} value={transportadora.id}>
+                  {transportadora.transportadora} - NF:{" "}
+                  {transportadora.numeroNF}
+                </option>
+              ))}
+            </select>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Área de Visualização dos Dados Selecionados */}
+      <Card className="mb-6 ">
+        <CardHeader>
+          <CardTitle>Dados Selecionados</CardTitle>
+        </CardHeader>
+
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {selectedFornecedor && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Fornecedor:</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                <p>{selectedFornecedor.fornecedor}</p>
+                <p>Código: {selectedFornecedor.codigo}</p>
+                <p>CNPJ: {selectedFornecedor.cnpj}</p>
+              </CardContent>
+            </Card>
           )}
 
-          {loading ? (
-            <div className="text-center p-4">Carregando...</div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="p-4">Selecionar</th>
-                    <th className="p-4">Código</th>
-                    <th className="p-4">Razão Social</th>
-                    <th className="p-4">CNPJ</th>
-                    <th className="p-4">Data Cad.</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {getCurrentData().map((item) => (
-                    <tr key={item.id}>
-                      <td className="p-4">
-                        <input
-                          type="checkbox"
-                          checked={selectedItems.includes(item.id)}
-                          onChange={() => {
-                            setSelectedItems((prev) =>
-                              prev.includes(item.id)
-                                ? prev.filter((id) => id !== item.id)
-                                : [...prev, item.id]
-                            );
-                          }}
-                          className="rounded border-gray-300"
-                        />
-                      </td>
-                      <td className="p-4">{item.codigo}</td>
-                      <td className="p-4">{item.razaoSocial}</td>
-                      <td className="p-4">{item.cnpj}</td>
-                      <td className="p-4">
-                        {format(new Date(item.dataCad), "dd/MM/yyyy")}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          {selectedCliente && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Cliente:</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{selectedCliente.cliente}</p>
+                <p>Código: {selectedCliente.codigo}</p>
+                <p>CNPJ: {selectedCliente.cnpj}</p>
+              </CardContent>
+            </Card>
           )}
-        </div>
-      </CardContent>
-    </Card>
+          {selectedTransportadora && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Transportadora:</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>{selectedTransportadora.transportadora}</p>
+                <p>NF: {selectedTransportadora.numeroNF}</p>
+                <p>
+                  Data:{" "}
+                  {selectedTransportadora.dataSaida
+                    ? format(
+                        new Date(selectedTransportadora.dataSaida),
+                        "dd/MM/yyyy"
+                      )
+                    : "Não definida"}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Botões de Exportação */}
+      <div className="flex gap-4 justify-end">
+        <Button
+          onClick={handlePreviewPDF}
+          className="disabled:opacity-50"
+          disabled={
+            !selectedCliente || !selectedFornecedor || !selectedTransportadora
+          }
+        >
+          Pré-visualizar PDF
+        </Button>
+        <Button
+          onClick={handleExportPDF}
+          className="disabled:opacity-50"
+          disabled={
+            !selectedCliente || !selectedFornecedor || !selectedTransportadora
+          }
+        >
+          Exportar PDF
+        </Button>
+      </div>
+      <Button
+        onClick={handleExportXLSX}
+        className="bg-green-500 hover:bg-green-600 disabled:opacity-50"
+        disabled={
+          !selectedCliente || !selectedFornecedor || !selectedTransportadora
+        }
+      >
+        Exportar XLSX
+      </Button>
+    </div>
   );
 };
 
-export default FilterAndPDFGenerator;
+export default TransportadoraExport;
