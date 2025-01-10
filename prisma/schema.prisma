@@ -8,27 +8,27 @@ datasource db {
 }
 
 model Cliente {
-  id             String   @id @default(uuid())
-  dataCad        DateTime @default(now())
-  codigo         String?
-  razaoSocial    String
-  cnpj           String   @unique
-  ie             String   @unique
-  endereco       String
-  endNumero      String
-  cep            String
-  cidade         String
-  estado         String
-  telefoneFixo   String?
-  celular        String?
-  email          String?
-  emailFin       String?
-  suframa        String?  
-  transp         String? 
-  tel            String?
-  NumeroNF       String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id           String   @id @default(uuid())
+  dataCad      DateTime @default(now())
+  codigo       String?
+  razaoSocial  String
+  cnpj         String   @unique
+  ie           String   @unique
+  endereco     String
+  endNumero    String
+  cep          String
+  cidade       String
+  estado       String
+  telefoneFixo String?
+  celular      String?
+  email        String?
+  emailFin     String?
+  suframa      String?
+  transp       String?
+  tel          String?
+  NumeroNF     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   transportadoras Transportadora[]
 
@@ -36,12 +36,12 @@ model Cliente {
 }
 
 model Fornecedor {
-  id              String   @id @default(uuid())
-  dataCad         DateTime @default(now())
-  codigo          String?   
+  id              String    @id @default(uuid())
+  dataCad         DateTime  @default(now())
+  codigo          String?
   razaoSocial     String
-  cnpj            String   @unique
-  ie              String   @unique
+  cnpj            String    @unique
+  ie              String    @unique
   endereco        String
   endNumero       String
   cep             String
@@ -49,12 +49,12 @@ model Fornecedor {
   celular         String?
   emailPedido     String?
   emailFin        String
-  comissao        String?  
-  dataRecebimento DateTime?  
-  obs             String?  @db.Text
+  comissao        String?
+  dataRecebimento DateTime?
+  obs             String?   @db.Text
   NumeroNF        String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   transportadoras Transportadora[]
 
@@ -62,29 +62,29 @@ model Fornecedor {
 }
 
 model Transportadora {
-  id             String      @id @default(uuid())
-  dataCad        DateTime    @default(now())
-  codigo         String?
-  razaoSocial    String
-  cnpj           String      @unique
-  ie             String      @unique
-  endereco       String?
-  endNumero      String?
-  cep            String?
-  cidade         String?
-  estado         String?
-  telefoneFixo   String?
-  celular        String?
-  email          String?
-  emailFina      String?
-  obs            String?     @db.Text
-  NumeroNF       String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  Cliente        Cliente?    @relation(fields: [clienteId], references: [id])
-  clienteId      String?
-  Fornecedor     Fornecedor? @relation(fields: [fornecedorId], references: [id])
-  fornecedorId   String?
+  id           String      @id @default(uuid())
+  dataCad      DateTime    @default(now())
+  codigo       String?
+  razaoSocial  String
+  cnpj         String      @unique
+  ie           String      @unique
+  endereco     String?
+  endNumero    String?
+  cep          String?
+  cidade       String?
+  estado       String?
+  telefoneFixo String?
+  celular      String?
+  email        String?
+  emailFina    String?
+  obs          String?     @db.Text
+  NumeroNF     String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  Cliente      Cliente?    @relation(fields: [clienteId], references: [id])
+  clienteId    String?
+  Fornecedor   Fornecedor? @relation(fields: [fornecedorId], references: [id])
+  fornecedorId String?
 
   @@map("transportadoras")
 }
