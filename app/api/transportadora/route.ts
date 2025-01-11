@@ -52,14 +52,21 @@ export async function POST(request: NextRequest) {
 
     const transportadora = await prisma.transportadora.create({
       data: {
-        codigo: data.codigo,
-        transportadora: data.transportadora,
-        numeroNF: data.NumeroNF,
-        descricao: data.descricao || "", // Permite que `descricao` seja opcional
-        quantidade,
-        valorUn: parseFloat(data.valor_unitario),
-        valorTotal,
-        dataSaida,
+        dataCad: new Date(data.dataCad),
+        ie: data.ie,
+        razaoSocial: data.razaoSocial,
+        cnpj: data.cnpj,
+        endereco: data.endereco || null,
+        cidade: data.cidade || null,
+        endNumero: data.endNumero || null,
+        cep: data.cep || null,
+        estado: data.cidade || null,
+        telefoneFixo: data.telefoneFixo || null,
+        celular: data.celular || null,
+        email: data.email || null,
+        emailFina: data.emailFina || null,
+        obs: data.obs || null,
+        NumeroNF: data.NumeroNF || null,
       },
     });
 

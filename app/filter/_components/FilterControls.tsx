@@ -7,7 +7,6 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import { Download, Eye, RefreshCw } from "lucide-react";
-import { SearchBar } from "./SearchBar";
 
 interface FilterControlsProps {
   selectedType: string;
@@ -45,7 +44,7 @@ export const FilterControls = ({
             <SelectContent>
               <SelectItem value="clientes">Clientes</SelectItem>
               <SelectItem value="fornecedores">Fornecedores</SelectItem>
-              <SelectItem value="transportadoras">Transportadoras</SelectItem>
+              <SelectItem value="transportadora">Transportadora</SelectItem>
             </SelectContent>
           </Select>
         </div>

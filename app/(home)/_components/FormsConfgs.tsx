@@ -1,7 +1,7 @@
 export const formConfigs = {
   cliente: {
     title: "Cadastro de Cliente",
-    codLabel: "Código do Cliente",
+    codLabel: false,
     dataCad: true,
     fields: {
       leftColumn: [
@@ -144,7 +144,7 @@ export const formConfigs = {
   transportadora: {
     title: "Cadastro de Transportadora",
     dataCad: true,
-    codLabel: "Código da Transp",
+    codLabel: "Código da Transportadora",
     fields: {
       leftColumn: [
         {

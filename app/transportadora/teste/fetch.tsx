@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Cliente, Fornecedor, Transportadora } from "@/app/types";
 import OrderXLSXGenerator from "./OrderXLSXGenerator";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/app/_components/ui/card";
 
 export default function NovoPedido() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -78,24 +84,22 @@ export default function NovoPedido() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="bg-white shadow-sm rounded-lg">
-        <div className="p-4">
-          <h1 className="text-xl font-semibold text-gray-800 mb-4">
-            Gerar Pedido Excel
-          </h1>
-
+    <div className="min-w-screen  min-h-screen flex justify-center items-center">
+      <Card className="w-[90%] md:w-[60%]">
+        <CardHeader>
+          <CardTitle>Gerar Pedido Excel</CardTitle>{" "}
+        </CardHeader>
+        <CardContent>
           <OrderXLSXGenerator
             clientes={clientes}
             fornecedores={fornecedores}
             transportadoras={transportadoras}
             onGenerateXLSX={() => {
               console.log("Excel gerado com sucesso!");
-              // Você pode adicionar aqui qualquer lógica adicional após gerar o Excel
             }}
           />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

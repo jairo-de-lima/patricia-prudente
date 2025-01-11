@@ -1,4 +1,4 @@
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 import { format } from "date-fns";
 import { Cliente, Fornecedor, Transportadora } from "./types";
 
@@ -12,46 +12,47 @@ export const generatePDF = async ({
   selectedData,
 }: PDFGeneratorProps) => {
   const pdfDoc = await PDFDocument.create();
-  let page = pdfDoc.addPage([595.276, 841.89]); // A4
-  const font = await pdfDoc.embedFont("Helvetica");
+  const page = pdfDoc.addPage([595.276, 841.89]); // A4
+  const fontRegular = await pdfDoc.embedFont("Helvetica");
+  const fontTitle = await pdfDoc.embedFont("Helvetica-Bold");
+  const fontScript = await pdfDoc.embedFont("Times-Italic");
 
   // Logo handling
   const logoResponse = await fetch("/logo.png");
   const logoArrayBuffer = await logoResponse.arrayBuffer();
   const logoImage = await pdfDoc.embedPng(logoArrayBuffer);
 
-  const logoWidth = 80;
-  const logoHeight = 50;
-  const logoX = 50;
-  const logoY = page.getHeight() - 100;
+  // Page constants
+  const pageWidth = page.getWidth();
+  const pageTop = page.getHeight();
+  const marginLeft = 50;
 
+  // Logo dimensions and position
+  const logoWidth = 100;
+  const logoHeight = 40;
+  const logoY = pageTop - 70;
+
+  // Draw logo
   page.drawImage(logoImage, {
-    x: logoX,
+    x: marginLeft,
     y: logoY,
     width: logoWidth,
     height: logoHeight,
   });
 
-  // Header text
-  const nameX = logoX + logoWidth + 50;
-  const nameY = logoY + logoHeight - 15;
-
-  page.drawText("Patricia Prudente", {
-    x: nameX,
-    y: nameY,
+  // Header text - Patricia Prudente
+  const headerText = "Patricia Prudente - Representante Comercial";
+  const headerY = logoY + 10;
+  page.drawText(headerText, {
+    x: marginLeft + logoWidth + 20,
+    y: headerY,
     size: 14,
-    font,
+    font: fontScript,
+    color: rgb(0.5, 0, 0.5),
   });
 
-  page.drawText("representante comercial", {
-    x: nameX,
-    y: nameY - 18,
-    size: 10,
-    font,
-  });
-
-  // Title
-  const headerText = `Cadastro de ${
+  // Form title
+  const formTitle = `Cadastro de ${
     selectedType === "clientes"
       ? "Cliente"
       : selectedType === "fornecedores"
@@ -59,107 +60,153 @@ export const generatePDF = async ({
       : "Transportadora"
   }`;
 
-  const headerFontSize = 14;
-  const textWidth = font.widthOfTextAtSize(headerText, headerFontSize);
-  const headerX = (page.getWidth() - textWidth) / 2;
-  const headerY = logoY - 50;
-
-  page.drawText(headerText, {
-    x: headerX,
-    y: headerY,
-    size: headerFontSize,
-    font,
+  const titleY = logoY - 50;
+  const titleWidth = fontTitle.widthOfTextAtSize(formTitle, 14);
+  page.drawText(formTitle, {
+    x: (pageWidth - titleWidth) / 2,
+    y: titleY,
+    size: 14,
+    font: fontTitle,
+    color: rgb(0.5, 0, 0.5),
   });
 
-  let yPosition = headerY - 50;
+  // Date field
+  const formattedDate = format(selectedData[0].dataCad, "dd/MM/yyyy");
+  page.drawText(`DATA CAD: ${formattedDate}`, {
+    x: pageWidth - 150,
+    y: titleY,
+    size: 12,
+    font: fontRegular,
+    color: rgb(0.5, 0, 0.5),
+  });
 
-  const drawField = (label: string, value: string | undefined, y: number) => {
-    page.drawText(`${label}:`, {
-      x: 50,
+  // Form fields
+  let yPosition = titleY - 40;
+  const lineHeight = 25;
+  const labelColor = rgb(0.5, 0, 0.5);
+
+  const drawField = (
+    label: string,
+    value: string | undefined,
+    x: number,
+    y: number,
+    width = 200
+  ) => {
+    // Draw label
+    page.drawText(label, {
+      x,
       y,
       size: 12,
-      font,
+      font: fontRegular,
+      color: labelColor,
     });
-    page.drawText(value || "_________________", {
-      x: 200,
-      y,
-      size: 12,
-      font,
+
+    // Calculate label width
+    const labelWidth = fontRegular.widthOfTextAtSize(label, 12);
+    const underscoreStart = x + labelWidth + 5;
+
+    // Draw underscore line
+    page.drawLine({
+      start: { x: underscoreStart, y: y - 2 },
+      end: { x: x + width, y: y - 2 },
+      thickness: 0.5,
+      color: rgb(0.7, 0.7, 0.7),
     });
+
+    if (value) {
+      page.drawText(value, {
+        x: underscoreStart,
+        y,
+        size: 12,
+        font: fontRegular,
+      });
+    }
   };
 
-  for (const item of selectedData) {
-    if (yPosition < 100) {
-      page = pdfDoc.addPage([595.276, 841.89]);
-      yPosition = 750;
+  const data = selectedData[0];
+
+  // Common fields for all types
+  if (data.codigo) {
+    drawField("Código", data.codigo, marginLeft, yPosition, 200);
+    yPosition -= lineHeight;
+  }
+
+  drawField("Razão Social", data.razaoSocial, marginLeft, yPosition, 400);
+  yPosition -= lineHeight;
+
+  drawField("CNPJ", data.cnpj, marginLeft, yPosition, 200);
+  drawField("IE", data.ie, marginLeft + 250, yPosition, 200);
+  yPosition -= lineHeight;
+
+  drawField("END", data.endereco, marginLeft, yPosition, 200);
+  drawField("Nº", data.endNumero, marginLeft + 250, yPosition, 50);
+  drawField("CEP", data.cep, marginLeft + 350, yPosition, 150);
+  yPosition -= lineHeight;
+
+  if ("email" in data && "emailFin" in data && "suframa" in data) {
+    // Cliente fields
+    drawField("CIDADE", data.cidade, marginLeft, yPosition, 200);
+    drawField("ESTADO", data.estado, marginLeft + 250, yPosition, 150);
+    yPosition -= lineHeight;
+
+    drawField("Tel Fixo", data.telefoneFixo, marginLeft, yPosition, 200);
+    drawField("Tel Cel", data.celular, marginLeft + 250, yPosition, 200);
+    yPosition -= lineHeight;
+
+    drawField("Email", data.email, marginLeft, yPosition, 200);
+    drawField("Email Fina", data.emailFin, marginLeft + 250, yPosition, 200);
+    yPosition -= lineHeight;
+
+    drawField("Suframa", data.suframa, marginLeft, yPosition, 200);
+
+    yPosition -= lineHeight;
+    drawField("Transp", data.transp, marginLeft, yPosition, 200);
+    drawField("Tel", data.tel, marginLeft + 250, yPosition, 200);
+  } else if (
+    "emailPedido" in data &&
+    "emailFin" in data &&
+    "comissao" in data
+  ) {
+    // Fornecedor fields
+    drawField("Tel Fixo", data.telefoneFixo, marginLeft, yPosition, 200);
+    drawField("Tel Cel", data.celular, marginLeft + 250, yPosition, 200);
+    yPosition -= lineHeight;
+
+    drawField("Email Pedido", data.emailPedido, marginLeft, yPosition, 200);
+    drawField("Email Fina", data.emailFin, marginLeft + 250, yPosition, 200);
+    yPosition -= lineHeight;
+
+    if (data.comissao) {
+      drawField("Comissão", `${data.comissao}%`, marginLeft, yPosition, 200);
+    } else {
+      drawField("Comissão", "0%", marginLeft, yPosition, 200);
     }
 
-    // Common fields
     drawField(
-      "Data Cad",
-      format(new Date(item.dataCad), "dd/MM/yyyy"),
-      yPosition
+      "Data Recebimento",
+      format(new Date(data.dataRecebimento), "dd/MM/yyyy"),
+      marginLeft + 250,
+      yPosition,
+      200
     );
-    yPosition -= 25;
-    drawField("Código", item.codigo, yPosition);
-    yPosition -= 25;
-    drawField("Razão Social", item.razaoSocial, yPosition);
-    yPosition -= 25;
-    drawField("CNPJ", item.cnpj, yPosition);
-    yPosition -= 25;
-    drawField("IE", item.ie, yPosition);
-    yPosition -= 25;
-    drawField("Endereço", `${item.endereco}, ${item.endNumero}`, yPosition);
-    yPosition -= 25;
-    drawField("CEP", item.cep, yPosition);
-    yPosition -= 25;
-    drawField("Telefone Fixo", item.telefoneFixo || "", yPosition);
-    yPosition -= 25;
-    drawField("Celular", item.celular || "", yPosition);
-    yPosition -= 25;
 
-    // Type-specific fields
-    if ("email" in item && "emailFin" in item && "suframa" in item) {
-      // Cliente
-      drawField("Email", item.email || "", yPosition);
-      yPosition -= 25;
-      drawField("Email Financeiro", item.emailFin, yPosition);
-      yPosition -= 25;
-      drawField("Suframa", item.suframa || "", yPosition);
-      yPosition -= 25;
-      drawField("Transportadora", item.transp || "", yPosition);
-      yPosition -= 25;
-    } else if (
-      "emailPedido" in item &&
-      "emailFin" in item &&
-      "comissao" in item
-    ) {
-      // Fornecedor
-      drawField("Email Pedido", item.emailPedido, yPosition);
-      yPosition -= 25;
-      drawField("Email Financeiro", item.emailFin, yPosition);
-      yPosition -= 25;
-      drawField("Comissão", item.comissao || "", yPosition);
-      yPosition -= 25;
-      if (item.dataRecebimento) {
-        drawField(
-          "Data Recebimento",
-          format(new Date(item.dataRecebimento), "dd/MM/yyyy"),
-          yPosition
-        );
-        yPosition -= 25;
-      }
-    } else if ("emailFina" in item) {
-      // Transportadora
-      drawField("Email", item.email || "", yPosition);
-      yPosition -= 25;
-      drawField("Email Financeiro", item.emailFina || "", yPosition);
-      yPosition -= 25;
-      drawField("Cidade", item.cidade, yPosition);
-      yPosition -= 25;
-      drawField("Estado", item.estado, yPosition);
-      yPosition -= 25;
-    }
+    yPosition -= lineHeight;
+    drawField("OBS", data.obs, marginLeft, yPosition, 400);
+  } else {
+    // Transportadora fields
+    drawField("CIDADE", data.cidade, marginLeft, yPosition, 200);
+    drawField("ESTADO", data.estado, marginLeft + 250, yPosition, 150);
+    yPosition -= lineHeight;
+
+    drawField("Tel Fixo", data.telefoneFixo, marginLeft, yPosition, 200);
+    drawField("Tel Cel", data.celular, marginLeft + 250, yPosition, 200);
+    yPosition -= lineHeight;
+
+    drawField("Email", data.email, marginLeft, yPosition, 200);
+    drawField("Email Fina", data.emailFina, marginLeft + 250, yPosition, 200);
+
+    yPosition -= lineHeight;
+    drawField("OBS", data.obs, marginLeft, yPosition, 400);
   }
 
   return pdfDoc.save();

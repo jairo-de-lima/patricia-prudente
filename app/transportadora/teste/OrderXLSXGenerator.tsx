@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import ExcelJS from "exceljs";
 import { Cliente, Fornecedor, Transportadora } from "@/app/types";
+import { Button } from "@/app/_components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/_components/ui/select";
+import { Label } from "@/app/_components/ui/label";
+import { format } from "date-fns";
 
 interface Props {
   clientes: Cliente[];
@@ -15,10 +25,13 @@ const OrderXLSXGenerator: React.FC<Props> = ({
   transportadoras,
   onGenerateXLSX,
 }) => {
-  const [selectedCliente, setSelectedCliente] = useState<string>("");
-  const [selectedFornecedor, setSelectedFornecedor] = useState<string>("");
-  const [selectedTransportadora, setSelectedTransportadora] =
-    useState<string>("");
+  const [selectedCliente, setSelectedCliente] = useState<string | null>("");
+  const [selectedFornecedor, setSelectedFornecedor] = useState<string | null>(
+    ""
+  );
+  const [selectedTransportadora, setSelectedTransportadora] = useState<
+    string | null
+  >("");
 
   const generateExcel = async () => {
     const cliente = clientes.find((c) => c.id === selectedCliente);
@@ -30,7 +43,21 @@ const OrderXLSXGenerator: React.FC<Props> = ({
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Pedido");
 
-    // Obter a logo
+    // Configurar larguras das colunas
+    worksheet.columns = [
+      { width: 4 }, // A - TAB
+      { width: 6 }, // B - Qtde
+      { width: 5 }, // C - Unid
+      { width: 8 }, // D - Cód
+      { width: 40 }, // E - Descrição
+      { width: 12 }, // F - Preço Unit
+      { width: 12 }, // G - Total
+      { width: 7 }, // H - DESC
+      { width: 12 }, // I - Preço Unit c/ desc
+      { width: 12 }, // J - Total
+    ];
+
+    // Obter e adicionar a logo
     const fetchBase64Logo = async () => {
       const response = await fetch("/logoxlsx.png");
       const blob = await response.blob();
@@ -42,106 +69,129 @@ const OrderXLSXGenerator: React.FC<Props> = ({
     };
     const logoBase64 = await fetchBase64Logo();
 
-    // Adicionar a logo
     const logoId = workbook.addImage({
       base64: logoBase64,
       extension: "png",
     });
 
+    // Logo ocupando A1:D3
     worksheet.addImage(logoId, {
       tl: { col: 0, row: 0 },
-      ext: { width: 100, height: 40 },
+      br: { col: 4, row: 3 },
     });
 
-    // Configurar larguras das colunas exatas
-    worksheet.columns = [
-      { width: 4 }, // Seq
-      { width: 6 }, // Qtde
-      { width: 5 }, // Unid
-      { width: 10 }, // Cód
-      { width: 40 }, // Descrição
-      { width: 12 }, // Preço Unit
-      { width: 12 }, // Total
-      { width: 8 }, // DESC
-      { width: 15 }, // Preço Unit c/ desc
-      { width: 12 }, // Total
-    ];
-
-    // Título e cabeçalho
-    worksheet.mergeCells("C1:J1");
-    const titleCell = worksheet.getCell("C1");
+    // Título principal - começa na coluna E
+    worksheet.mergeCells("E1:J2");
+    const titleCell = worksheet.getCell("E1");
     titleCell.value = "Patricia Prudente-Representante Comercial";
-    titleCell.font = { bold: true, color: { argb: "FFFF1493" } };
-    titleCell.alignment = { horizontal: "center" };
+    titleCell.font = {
+      name: "Comic Sans MS",
+      size: 16,
+      color: { argb: "FFFF00FF" },
+      italic: true,
+    };
+    titleCell.alignment = { horizontal: "center", vertical: "middle" };
 
-    // TALÃO DE PEDIDO
-    worksheet.mergeCells("A2:G2");
-    const pedidoCell = worksheet.getCell("A2");
+    // TALÃO DE PEDIDO e TABELA
+    worksheet.mergeCells("E3:G3");
+    const pedidoCell = worksheet.getCell("E3");
     pedidoCell.value = "TALÃO DE PEDIDO";
-    pedidoCell.font = { bold: true };
-    pedidoCell.alignment = { horizontal: "left" };
+    pedidoCell.font = {
+      bold: true,
+      size: 14,
+      color: { argb: "FFFF00FF" },
+    };
+    pedidoCell.alignment = { horizontal: "left", vertical: "middle" };
 
-    // TABELA 2
-    worksheet.getCell("H2").value = "TABELA";
-    worksheet.getCell("J2").value =
-      cliente?.NumeroNF || fornecedor?.NumeroNF || transportadora?.NumeroNF;
-    worksheet.getCell("J2").font = { bold: true, color: { argb: "FFFF1493" } };
+    // TABELA e número
+    worksheet.getCell("H3").value = "TABELA";
+    worksheet.getCell("H3").font = {
+      bold: true,
+      color: { argb: "FFFF00FF" },
+    };
 
-    // Dados do cliente
-    const clienteData = [
-      ["Cliente:", cliente?.razaoSocial || "", "", "Contato:", ""],
-      [
-        "Endereço:",
-        cliente?.endereco || "",
-        "Estado:",
-        cliente?.estado || "",
-        "CEP:",
-        cliente?.cep || "",
-        "Cidade:",
-        cliente?.cidade || "",
-      ],
-      [
-        "Tel:",
-        cliente?.telefoneFixo || cliente?.celular || "",
-        "E-MAIL:",
-        cliente?.email || "",
-      ],
-      [
-        "CNPJ:",
-        cliente?.cnpj || "",
-        "IE:",
-        cliente?.ie || "",
-        "",
-        "",
-        "NIF:",
-        "",
-        "DATA SAÍDA:",
-      ],
-      ["Transp.:", transportadora?.razaoSocial],
-      ["Endereço:", transportadora?.endereco || ""],
-    ];
+    worksheet.getCell("J3").value = "2";
+    worksheet.getCell("J3").font = {
+      bold: true,
+      size: 16,
+      color: { argb: "FFFF00FF" },
+    };
 
-    clienteData.forEach((row, index) => {
-      worksheet.addRow(row);
-    });
+    // Função auxiliar para adicionar campos com label colorido
+    const addLabelValueRow = (
+      row: number,
+      label: string,
+      value: string,
+      colspan: number = 1
+    ) => {
+      const cell = worksheet.getCell(`A${row}`);
+      cell.value = label;
+      cell.font = { color: { argb: "FFFF00FF" } };
+
+      if (colspan > 1) {
+        worksheet.mergeCells(
+          `B${row}:${String.fromCharCode(65 + colspan)}${row}`
+        );
+      }
+      worksheet.getCell(`B${row}`).value = value;
+    };
+
+    // Cliente e Contato
+    addLabelValueRow(4, "Cliente:", cliente?.razaoSocial || "", 5);
+    worksheet.getCell("G4").value = "Contato:";
+    worksheet.getCell("G4").font = { color: { argb: "FFFF00FF" } };
+
+    // Endereço completo
+    addLabelValueRow(5, "Endereço:", cliente?.endereco || "", 2);
+    worksheet.getCell("C5").value = "Estado:";
+    worksheet.getCell("C5").font = { color: { argb: "FFFF00FF" } };
+    worksheet.getCell("D5").value = cliente?.estado || "";
+    worksheet.getCell("E5").value = "CEP:";
+    worksheet.getCell("E5").font = { color: { argb: "FFFF00FF" } };
+    worksheet.getCell("F5").value = cliente?.cep || "";
+    worksheet.getCell("G5").value = "Cidade:";
+    worksheet.getCell("G5").font = { color: { argb: "FFFF00FF" } };
+    worksheet.getCell("H5").value = cliente?.cidade || "";
+
+    // Telefone e E-mail
+    addLabelValueRow(6, "Tel:", cliente?.telefoneFixo || "", 2);
+    worksheet.getCell("C6").value = "E-MAIL";
+    worksheet.getCell("C6").font = { color: { argb: "FFFF00FF" } };
+    worksheet.mergeCells("D6:F6");
+    worksheet.getCell("D6").value = cliente?.email || "";
+    worksheet.getCell("G6").value = "E-MAIL";
+    worksheet.getCell("G6").font = { color: { argb: "FFFF00FF" } };
+
+    // CNPJ e outros
+    addLabelValueRow(7, "CNPJ:", cliente?.cnpj || "", 2);
+    worksheet.getCell("C7").value = "IE:";
+    worksheet.getCell("C7").font = { color: { argb: "FFFF00FF" } };
+    worksheet.getCell("D7").value = cliente?.ie || "";
+    worksheet.getCell("G7").value = "NF";
+    worksheet.getCell("G7").font = { color: { argb: "FFFF00FF" } };
+    worksheet.getCell("I7").value = "DATA SAÍDA:";
+    worksheet.getCell("I7").font = { color: { argb: "FFFF00FF" } };
+
+    // Transportadora
+    addLabelValueRow(8, "Transp.:", transportadora?.razaoSocial || "", 7);
+    addLabelValueRow(9, "Endereço:", transportadora?.endereco || "", 7);
 
     // COND. PAGAMENTO
-    worksheet.addRow([]);
-    const condPagamentoRow = worksheet.addRow(["COND. PAGAMENTO"]);
-    worksheet.mergeCells(
-      `A${condPagamentoRow.number}:J${condPagamentoRow.number}`
-    );
-    condPagamentoRow.getCell(1).fill = {
+    worksheet.mergeCells("A11:J11");
+    const pagamentoCell = worksheet.getCell("A11");
+    pagamentoCell.value = "COND. PAGAMENTO";
+    pagamentoCell.font = { bold: true, color: { argb: "FFFF00FF" } };
+    pagamentoCell.fill = {
       type: "pattern",
       pattern: "solid",
       fgColor: { argb: "FFFFFF00" },
     };
-    condPagamentoRow.font = { bold: true };
+    pagamentoCell.alignment = { horizontal: "left", vertical: "middle" };
 
     // Cabeçalho da tabela de produtos
-    worksheet.addRow([]);
-    const headerRow = worksheet.addRow([
-      "Seq",
+    const headerRow = worksheet.getRow(13);
+    headerRow.values = [
+      "TAB",
       "Qtde",
       "Unid.",
       "Cód.",
@@ -151,79 +201,72 @@ const OrderXLSXGenerator: React.FC<Props> = ({
       "DESC.",
       "Preço Unit. c/ desc.",
       "Total",
-    ]);
-    headerRow.font = { bold: true };
+    ];
+    headerRow.font = { bold: true, color: { argb: "FFFF00FF" } };
 
-    // 6 linhas em branco para produtos com fórmulas
+    // Linhas de produtos (vazias mas com fórmulas)
     for (let i = 1; i <= 6; i++) {
       const rowNumber = headerRow.number + i;
       const row = worksheet.addRow([i, "", "PC", "", ""]);
 
-      // Adicionar fórmulas
       row.getCell(6).numFmt = '"R$ "#,##0.00';
-      row.getCell(7).value = {
-        formula: `F${rowNumber}*B${rowNumber}`,
-        date1904: false,
-      };
+      row.getCell(7).value = { formula: `B${rowNumber}*F${rowNumber}` };
       row.getCell(7).numFmt = '"R$ "#,##0.00';
       row.getCell(8).numFmt = '0"%"';
-      row.getCell(9).value = {
-        formula: `F${rowNumber}-H${rowNumber}`,
-        date1904: false,
-      };
+      row.getCell(9).value = { formula: `F${rowNumber}*(1-H${rowNumber})` };
       row.getCell(9).numFmt = '"R$ "#,##0.00';
-      row.getCell(10).value = {
-        formula: `B${rowNumber}*I${rowNumber}`,
-        date1904: false,
-      };
+      row.getCell(10).value = { formula: `B${rowNumber}*I${rowNumber}` };
       row.getCell(10).numFmt = '"R$ "#,##0.00';
     }
 
-    // Valor total
-    worksheet.addRow([]);
-    const totalRow = worksheet.addRow([
-      "VALOR TOTAL:",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      {
-        formula: `SUM(J${headerRow.number + 1}:J${headerRow.number + 6})`,
-        date1904: false,
-      },
-    ]);
-    totalRow.getCell(10).numFmt = '"R$ "#,##0.00';
+    // VALOR TOTAL
+    const totalRowNum = headerRow.number + 8;
+    const totalRow = worksheet.getRow(totalRowNum);
+    worksheet.mergeCells(`A${totalRowNum}:I${totalRowNum}`);
+    worksheet.getCell(`A${totalRowNum}`).value = "VALOR TOTAL:";
+    worksheet.getCell(`A${totalRowNum}`).font = { bold: true };
+    worksheet.getCell(`J${totalRowNum}`).value = {
+      formula: `SUM(J${headerRow.number + 1}:J${headerRow.number + 6})`,
+    };
+    worksheet.getCell(`J${totalRowNum}`).numFmt = '"R$ "#,##0.00';
 
     // Rodapé
-    worksheet.addRow([]);
-    worksheet.addRow([
-      `Data: ${new Date().toLocaleDateString()}`,
-      "",
-      "Vendedor: PATRICIA PRUDENTE/BH REPRESENTAÇÕES",
-    ]);
-    worksheet.addRow(["Pedido sujeito a confirmação do fornecedor."]);
-    worksheet.addRow([
-      "As mercadorias viajam por conta e risco do(s) comprador(es).",
-    ]);
-    worksheet.addRow([
-      "Por favor respeitar o pedido mínimo de cada fornecedor.",
-    ]);
+    const footerStartRow = totalRowNum + 2;
+    worksheet.mergeCells(`A${footerStartRow}:C${footerStartRow}`);
+    worksheet.getCell(`A${footerStartRow}`).value = `Data: ${format(
+      new Date(),
+      "dd/MM/yyyy"
+    )}`;
+    worksheet.mergeCells(`D${footerStartRow}:J${footerStartRow}`);
+    worksheet.getCell(`D${footerStartRow}`).value =
+      "Vendedor: PATRICIA PRUDENTE/BH REPRESENTAÇÕES";
 
-    // Bordas para todas as células utilizadas
-    worksheet.eachRow((row) => {
-      row.eachCell((cell) => {
+    const messages = [
+      "Pedido sujeito a confirmação do fornecedor.",
+      "As mercadorias viajam por conta e risco do(s) comprador(es).",
+      "Por favor respeitar o pedido mínimo de cada fornecedor.",
+    ];
+
+    messages.forEach((message, idx) => {
+      const rowNum = footerStartRow + 1 + idx;
+      worksheet.mergeCells(`A${rowNum}:J${rowNum}`);
+      worksheet.getCell(`A${rowNum}`).value = message;
+      worksheet.getCell(`A${rowNum}`).font = { color: { argb: "FFFF0000" } };
+    });
+
+    // Adicionar bordas em todas as células
+    const lastRow = footerStartRow + messages.length;
+    for (let row = 1; row <= lastRow; row++) {
+      for (let col = 1; col <= 10; col++) {
+        const cell = worksheet.getCell(row, col);
         cell.border = {
           top: { style: "thin" },
           left: { style: "thin" },
           bottom: { style: "thin" },
           right: { style: "thin" },
         };
-      });
-    });
+      }
+    }
 
     // Gerar e baixar o arquivo
     const buffer = await workbook.xlsx.writeBuffer();
@@ -233,7 +276,7 @@ const OrderXLSXGenerator: React.FC<Props> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `pedido_${new Date().getTime()}.xlsx`;
+    a.download = `pedido_${format(new Date(), "dd-MM-yyyy")}.xlsx`;
     a.click();
 
     if (onGenerateXLSX) {
@@ -244,68 +287,82 @@ const OrderXLSXGenerator: React.FC<Props> = ({
   return (
     <div className="space-y-4 p-4">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Cliente */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Cliente
-          </label>
-          <select
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={selectedCliente}
-            onChange={(e) => setSelectedCliente(e.target.value)}
+          <Label htmlFor="cliente">Cliente</Label>
+          <Select
+            value={selectedCliente || "none"} // Definir "none" como valor inicial
+            onValueChange={(value) =>
+              setSelectedCliente(value === "none" ? null : value)
+            } // Tratar "none" como valor vazio
           >
-            <option value="">Selecione um cliente</option>
-            {clientes.map((cliente) => (
-              <option key={cliente.id} value={cliente.id}>
-                {cliente.razaoSocial}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="cliente" className="w-full">
+              <SelectValue placeholder="Selecione um cliente" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Selecione um cliente</SelectItem>
+              {clientes.map((cliente) => (
+                <SelectItem key={cliente.id} value={cliente.id}>
+                  {cliente.razaoSocial}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
+        {/* Fornecedor */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Fornecedor
-          </label>
-          <select
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={selectedFornecedor}
-            onChange={(e) => setSelectedFornecedor(e.target.value)}
+          <Label htmlFor="fornecedor">Fornecedor</Label>
+          <Select
+            value={selectedFornecedor || "none"} // Definir "none" como valor inicial
+            onValueChange={(value) =>
+              setSelectedFornecedor(value === "none" ? null : value)
+            } // Tratar "none" como valor vazio
           >
-            <option value="">Selecione um fornecedor</option>
-            {fornecedores.map((fornecedor) => (
-              <option key={fornecedor.id} value={fornecedor.id}>
-                {fornecedor.razaoSocial}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="fornecedor" className="w-full">
+              <SelectValue placeholder="Selecione um fornecedor" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Selecione um fornecedor</SelectItem>
+              {fornecedores.map((fornecedor) => (
+                <SelectItem key={fornecedor.id} value={fornecedor.id}>
+                  {fornecedor.razaoSocial}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
+        {/* Transportadora */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Transportadora
-          </label>
-          <select
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={selectedTransportadora}
-            onChange={(e) => setSelectedTransportadora(e.target.value)}
+          <Label htmlFor="transportadora">Transportadora</Label>
+          <Select
+            value={selectedTransportadora || "none"} // Definir "none" como valor inicial
+            onValueChange={(value) =>
+              setSelectedTransportadora(value === "none" ? null : value)
+            } // Tratar "none" como valor vazio
           >
-            <option value="">Selecione uma transportadora</option>
-            {transportadoras.map((transportadora) => (
-              <option key={transportadora.id} value={transportadora.id}>
-                {transportadora.razaoSocial}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="transportadora" className="w-full">
+              <SelectValue placeholder="Selecione uma transportadora" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Selecione uma transportadora</SelectItem>
+              {transportadoras.map((transportadora) => (
+                <SelectItem key={transportadora.id} value={transportadora.id}>
+                  {transportadora.razaoSocial}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <button
+      <Button
         onClick={generateExcel}
         disabled={!selectedCliente || !selectedFornecedor}
-        className="w-full md:w-auto px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
       >
         Gerar Pedido Excel
-      </button>
+      </Button>
     </div>
   );
 };
