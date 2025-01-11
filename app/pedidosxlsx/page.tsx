@@ -1,10 +1,7 @@
 "use client";
 import Footer from "../_components/Footer";
 import Navbar from "../_components/Navbar";
-import TransportadoraExport from "./_components/carrier";
-import CarrierPage from "./_components/carrier";
-import FilterAndPDFGenerator from "./_components/filterandpdfgenerate";
-import NovoPedido from "./teste/fetch";
+import NovoPedido from "./_components/fetch";
 
 // array de fornecedores para depuracao
 const fornecedores = [
