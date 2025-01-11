@@ -28,11 +28,11 @@ const Navbar = () => {
           <Link href="/" className="hover:text-gray-300">
             Cadastros
           </Link>
-          <Link href="/transportadora" className="hover:text-gray-300">
-            Transportadoras
+          <Link href="/filter" className="hover:text-gray-300">
+            PDF - Filter
           </Link>
           <Link href="/filter" className="hover:text-gray-300">
-            Filtrar
+            Pedidos - XLSX
           </Link>
         </div>
 
