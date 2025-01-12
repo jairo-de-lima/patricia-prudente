@@ -3,13 +3,24 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/app/_components/ui/card";
 import { FilterControls } from "./_components/FilterControls";
-import { generatePDF } from "./_components/PDFGenerator"; // mantém o mesmo do exemplo anterior
-import type { Cliente, Fornecedor, Transportadora } from "./_components/types"; // mantém o mesmo do exemplo anterior
+import { generatePDF } from "./_components/PDFGenerator";
+import type { Cliente, Fornecedor, Transportadora } from "./_components/types";
 import Navbar from "../_components/Navbar";
 import Footer from "../_components/Footer";
 import { EntityCard } from "./_components/EntityCard";
 import { SearchBar } from "./_components/SearchBar";
 import { PDFPreviewModal } from "./_components/PDFPreviewModal";
+import { EntityEditForm } from "./_components/EntityEditForm";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/app/_components/ui/dialog"; // Certifique-se de ter este componente
+
+type EntityType = Cliente | Fornecedor | Transportadora;
 
 export default function FilterAndPDFGenerator() {
   const [selectedType, setSelectedType] = useState<string>("clientes");
@@ -22,6 +33,41 @@ export default function FilterAndPDFGenerator() {
   const [searchTerm, setSearchTerm] = useState("");
   const [pdfPreview, setPdfPreview] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [entities, setEntities] = useState<EntityType[]>([]);
+  const [editingEntity, setEditingEntity] = useState<EntityType | null>(null);
+
+  const handleEdit = (entity: EntityType) => {
+    setEditingEntity(entity);
+  };
+
+  const handleSave = (updatedEntity: EntityType) => {
+    setEntities((prev) =>
+      prev.map((e) => (e.id === updatedEntity.id ? updatedEntity : e))
+    );
+    setEditingEntity(null);
+  };
+
+  const handleCancel = () => {
+    setEditingEntity(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/${selectedType}/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Erro ao excluir o item.");
+      setData((prevData) => prevData.filter((item) => item.id !== id));
+      setSelectedItems((prevSelected) =>
+        prevSelected.filter((itemId) => itemId !== id)
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao excluir o item.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -46,6 +92,7 @@ export default function FilterAndPDFGenerator() {
   useEffect(() => {
     loadData();
   }, [selectedType]);
+
   const handleGeneratePDF = async (preview: boolean = false) => {
     try {
       setLoading(true);
@@ -103,7 +150,7 @@ export default function FilterAndPDFGenerator() {
   return (
     <div>
       <Navbar />
-      <div className="flex min-h-screen min-w-scren justify-center items-center">
+      <div className="flex min-h-screen min-w-screen justify-center items-center">
         <Card className="w-[90%] max-w-6xl mx-auto p-6">
           <CardContent className="space-y-6">
             <FilterControls
@@ -157,6 +204,8 @@ export default function FilterAndPDFGenerator() {
                         entity={item}
                         selected={selectedItems.includes(item.id)}
                         onClick={() => toggleSelection(item.id)}
+                        onEdit={() => handleEdit(item)}
+                        onDelete={() => handleDelete(item.id)}
                       />
                     ))}
                   </div>
@@ -165,6 +214,30 @@ export default function FilterAndPDFGenerator() {
             )}
           </CardContent>
         </Card>
+
+        {/* Modal de edição */}
+        {/* {editingEntity && (
+          <Dialog open={!!editingEntity} onOpenChange={handleCancel}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar Entidade</DialogTitle>
+              </DialogHeader>
+              <EntityEditForm
+                entity={editingEntity}
+                onSave={handleSave}
+                onCancel={handleCancel}
+              />
+            </DialogContent>
+          </Dialog>
+        )} */}
+        {editingEntity && (
+          <EntityEditForm
+            entity={editingEntity}
+            onSave={handleSave}
+            onCancel={handleCancel}
+            isOpen={!!editingEntity}
+          />
+        )}
 
         <PDFPreviewModal
           isOpen={isPreviewOpen}
