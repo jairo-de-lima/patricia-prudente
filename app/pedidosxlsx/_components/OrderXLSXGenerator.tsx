@@ -45,16 +45,16 @@ const OrderXLSXGenerator: React.FC<Props> = ({
 
     // Configurar larguras das colunas
     worksheet.columns = [
-      { width: 4 }, // A - TAB
+      { width: 10 }, // A - TAB
       { width: 6 }, // B - Qtde
       { width: 5 }, // C - Unid
-      { width: 8 }, // D - Cód
+      { width: 12 }, // D - Cód (aumentado de 8 para 12)
       { width: 40 }, // E - Descrição
-      { width: 12 }, // F - Preço Unit
-      { width: 12 }, // G - Total
-      { width: 7 }, // H - DESC
-      { width: 12 }, // I - Preço Unit c/ desc
-      { width: 12 }, // J - Total
+      { width: 15 }, // F - Preço Unit (aumentado de 12 para 15)
+      { width: 15 }, // G - Total (aumentado de 12 para 15)
+      { width: 10 }, // H - DESC (aumentado de 7 para 10)
+      { width: 15 }, // I - Preço Unit c/ desc (aumentado de 12 para 15)
+      { width: 15 }, // J - Total (aumentado de 12 para 15)
     ];
 
     // Obter e adicionar a logo
@@ -76,9 +76,10 @@ const OrderXLSXGenerator: React.FC<Props> = ({
 
     // Logo ocupando A1:D3
     worksheet.addImage(logoId, {
-      tl: { col: 0, row: 0 },
+      tl: { col: 0.5, row: 0 },
       br: { col: 4, row: 3 },
     });
+    worksheet.mergeCells("A1:D3");
 
     // Título principal - começa na coluna E
     worksheet.mergeCells("E1:J2");
@@ -110,7 +111,8 @@ const OrderXLSXGenerator: React.FC<Props> = ({
       color: { argb: "FFFF00FF" },
     };
 
-    worksheet.getCell("J3").value = "2";
+    worksheet.getCell("J3").value =
+      transportadora?.NumeroNF || cliente?.NumeroNF || fornecedor?.NumeroNF;
     worksheet.getCell("J3").font = {
       bold: true,
       size: 16,
