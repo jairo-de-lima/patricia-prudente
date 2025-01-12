@@ -11,14 +11,7 @@ import { EntityCard } from "./_components/EntityCard";
 import { SearchBar } from "./_components/SearchBar";
 import { PDFPreviewModal } from "./_components/PDFPreviewModal";
 import { EntityEditForm } from "./_components/EntityEditForm";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/app/_components/ui/dialog"; // Certifique-se de ter este componente
+import { useToast } from "../_hooks/use-toast";
 
 type EntityType = Cliente | Fornecedor | Transportadora;
 
@@ -35,16 +28,46 @@ export default function FilterAndPDFGenerator() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [entities, setEntities] = useState<EntityType[]>([]);
   const [editingEntity, setEditingEntity] = useState<EntityType | null>(null);
+  const { toast } = useToast();
 
   const handleEdit = (entity: EntityType) => {
     setEditingEntity(entity);
   };
 
-  const handleSave = (updatedEntity: EntityType) => {
-    setEntities((prev) =>
-      prev.map((e) => (e.id === updatedEntity.id ? updatedEntity : e))
-    );
-    setEditingEntity(null);
+  const handleSave = async (updatedEntity: EntityType) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(`/api/${selectedType}/${updatedEntity.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedEntity),
+      });
+      if (response.ok) {
+        toast({
+          title: "Sucesso",
+          description: "Cadastro atualizado com sucesso",
+          duration: 2000,
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Houve um erro ao editar cadastro!",
+          duration: 2000,
+        });
+      }
+      setEditingEntity(null); // Fecha o formulário de edição
+
+      // Recarrega os dados para refletir as alterações feitas
+      await loadData();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erro ao salvar a entidade."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -57,7 +80,19 @@ export default function FilterAndPDFGenerator() {
       const response = await fetch(`/api/${selectedType}/${id}`, {
         method: "DELETE",
       });
-      if (!response.ok) throw new Error("Erro ao excluir o item.");
+      if (response.ok) {
+        toast({
+          title: "Sucesso",
+          description: "Cadastro deletado com sucesso",
+          duration: 2000,
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possivel deletar cadastro",
+          duration: 2000,
+        });
+      }
       setData((prevData) => prevData.filter((item) => item.id !== id));
       setSelectedItems((prevSelected) =>
         prevSelected.filter((itemId) => itemId !== id)
