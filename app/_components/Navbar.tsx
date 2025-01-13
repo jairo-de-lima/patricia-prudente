@@ -28,11 +28,13 @@ const Navbar = () => {
           <Link href="/" className="hover:text-gray-300">
             Cadastros
           </Link>
-          <Link href="/pedidosxlsx" className="hover:text-gray-300">
-            Pedidos
-          </Link>
+
           <Link href="/pdf-filter" className="hover:text-gray-300">
             Filtrar
+          </Link>
+
+          <Link href="/pedidosxlsx" className="hover:text-gray-300">
+            Pedidos
           </Link>
         </div>
 
@@ -52,19 +54,19 @@ const Navbar = () => {
 
                 <MenubarItem>
                   <Link
-                    href="/pedidosxlsx"
+                    href="/pdf-filter"
                     className="block py-1 px-3 hover:text-gray-300"
                   >
-                    Pedidos
+                    Filtrar
                   </Link>
                 </MenubarItem>
 
                 <MenubarItem>
                   <Link
-                    href="/pdf-filter"
+                    href="/pedidosxlsx"
                     className="block py-1 px-3 hover:text-gray-300"
                   >
-                    Filtrar
+                    Pedidos
                   </Link>
                 </MenubarItem>
               </MenubarContent>
