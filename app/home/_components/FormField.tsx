@@ -1,3 +1,4 @@
+"use client";
 import { Label } from "@/app/_components/ui/label";
 import { Input } from "@/app/_components/ui/input";
 import { FieldConfig } from "./types";

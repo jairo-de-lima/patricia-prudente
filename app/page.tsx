@@ -1,13 +1,5 @@
-import Form from "./(home)/page";
-import Footer from "./_components/Footer";
-import Navbar from "./_components/Navbar";
+import { redirect } from "next/navigation";
 
-export default function Home() {
-  return (
-    <main className="flex h-full w-full flex-col">
-      <Navbar />
-      <Form />
-      <Footer />
-    </main>
-  );
+export default function Page() {
+  redirect("/home");
 }

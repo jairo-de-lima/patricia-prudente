@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build --no-lint",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "rm -rf .next"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
@@ -35,6 +36,7 @@
     "prisma": "^6.1.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-input-mask": "^2.0.4",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "xlsx": "^0.18.5"
