@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import FormField from "./FormField";
 import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
+import { FormConfig } from "./types";
 
 type FormContentProps = {
   config: FormConfig;

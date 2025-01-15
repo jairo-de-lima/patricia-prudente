@@ -28,12 +28,13 @@ const Navbar = () => {
           <Link href="/" className="hover:text-gray-300">
             Cadastros
           </Link>
-          <Link href="/filter" className="hover:text-gray-300">
-            PDF - Filter
+          <Link href="/pdf-filter" className="hover:text-gray-300">
+            Filtrar
           </Link>
-          <Link href="/filter" className="hover:text-gray-300">
-            Pedidos - XLSX
-          </Link>
+          {/* <Link href="/pedidosxlsx" className="hover:text-gray-300">
+            Pedidos
+          </Link> */}
+         
         </div>
 
         <div className="md:hidden">
@@ -51,22 +52,23 @@ const Navbar = () => {
                 </MenubarItem>
 
                 <MenubarItem>
-                  <Link
-                    href="/transportadora"
-                    className="block py-1 px-3 hover:text-gray-300"
-                  >
-                    Transportadoras
-                  </Link>
-                </MenubarItem>
-
-                <MenubarItem>
-                  <Link
-                    href="/filter"
+                <Link
+                    href="/pdf-filter"
                     className="block py-1 px-3 hover:text-gray-300"
                   >
                     Filtrar
                   </Link>
                 </MenubarItem>
+
+                {/* <MenubarItem>
+                <Link
+                    href="/pedidosxlsx"
+                    className="block py-1 px-3 hover:text-gray-300"
+                  >
+                    Pedidos
+                  </Link>
+
+                </MenubarItem> */}
               </MenubarContent>
             </MenubarMenu>
           </Menubar>
@@ -77,3 +79,7 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
+
+

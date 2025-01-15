@@ -22,7 +22,6 @@ export async function POST(request: Request) {
 
     // Validação básica para verificar se os campos obrigatórios estão presentes
     const requiredFields = [
-      "codigo",
       "razaoSocial",
       "cnpj",
       "ie",

@@ -7,12 +7,14 @@ import {
 } from "@/app/_components/ui/dialog";
 import { Button } from "@/app/_components/ui/button";
 import { Download, X, ChevronLeft, ChevronRight } from "lucide-react";
+
 interface PDFPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   pdfUrl: string | null;
   onDownload: () => void;
 }
+
 export const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
   isOpen,
   onClose,
@@ -21,6 +23,7 @@ export const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
 }) => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [totalPages, setTotalPages] = React.useState(1);
+
   React.useEffect(() => {
     // Reset pages when modal opens/closes
     if (!isOpen) {
@@ -28,6 +31,7 @@ export const PDFPreviewModal: React.FC<PDFPreviewModalProps> = ({
       setTotalPages(1);
     }
   }, [isOpen]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="flex flex-col max-w-4xl w-full h-[80vh]">

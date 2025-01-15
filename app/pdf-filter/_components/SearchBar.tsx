@@ -1,10 +1,12 @@
 import { Input } from "@/app/_components/ui/input";
 import { Search } from "lucide-react";
+
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
 }
+
 export const SearchBar = ({ value, onChange, placeholder }: SearchBarProps) => {
   return (
     <div className="relative">

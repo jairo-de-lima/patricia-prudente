@@ -1,15 +1,19 @@
 "use client";
+
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/app/_components/ui/card";
 import { FilterControls } from "./_components/FilterControls";
-import { generatePDF } from "./_components/PDFGenerator"; // mantém o mesmo do exemplo anterior
-import type { Cliente, Fornecedor, Transportadora } from "./_components/types"; // mantém o mesmo do exemplo anterior
+import { generatePDF } from "./_components/PDFGenerator";
+import type { Cliente, Fornecedor, Transportadora } from "./_components/types";
 import Navbar from "../_components/Navbar";
 import Footer from "../_components/Footer";
-
+import { EntityCard } from "./_components/EntityCard";
 import { SearchBar } from "./_components/SearchBar";
 import { PDFPreviewModal } from "./_components/PDFPreviewModal";
-import { EntityCard } from "./_components/EntityCard";
+import { EntityEditForm } from "./_components/EntityEditForm";
+import { useToast } from "../_hooks/use-toast";
+
+type EntityType = Cliente | Fornecedor | Transportadora;
 
 export default function FilterAndPDFGenerator() {
   const [selectedType, setSelectedType] = useState<string>("clientes");
@@ -22,11 +26,90 @@ export default function FilterAndPDFGenerator() {
   const [searchTerm, setSearchTerm] = useState("");
   const [pdfPreview, setPdfPreview] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [entities, setEntities] = useState<EntityType[]>([]);
+  const [editingEntity, setEditingEntity] = useState<EntityType | null>(null);
+  const { toast } = useToast();
+
+  const handleEdit = (entity: EntityType) => {
+    setEditingEntity(entity);
+  };
+
+  const handleSave = async (updatedEntity: EntityType) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(`/api/${selectedType}/${updatedEntity.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedEntity),
+      });
+      if (response.ok) {
+        toast({
+          title: "Sucesso",
+          description: "Cadastro atualizado com sucesso",
+          duration: 2000,
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Houve um erro ao editar cadastro!",
+          duration: 2000,
+        });
+      }
+      setEditingEntity(null); // Fecha o formulário de edição
+
+      // Recarrega os dados para refletir as alterações feitas
+      await loadData();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erro ao salvar a entidade."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingEntity(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/${selectedType}/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        toast({
+          title: "Sucesso",
+          description: "Cadastro deletado com sucesso",
+          duration: 2000,
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possivel deletar cadastro",
+          duration: 2000,
+        });
+      }
+      setData((prevData) => prevData.filter((item) => item.id !== id));
+      setSelectedItems((prevSelected) =>
+        prevSelected.filter((itemId) => itemId !== id)
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao excluir o item.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
     setError(null);
     setSelectedItems([]);
     setSearchTerm("");
+
     try {
       const response = await fetch(`/api/${selectedType}`);
       if (!response.ok) throw new Error(`Erro ao carregar ${selectedType}`);
@@ -40,9 +123,11 @@ export default function FilterAndPDFGenerator() {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     loadData();
   }, [selectedType]);
+
   const handleGeneratePDF = async (preview: boolean = false) => {
     try {
       setLoading(true);
@@ -50,8 +135,10 @@ export default function FilterAndPDFGenerator() {
         selectedItems.includes(item.id)
       );
       const pdfBytes = await generatePDF({ selectedType, selectedData });
+
       const blob = new Blob([pdfBytes], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
+
       if (preview) {
         setPdfPreview(url);
         setIsPreviewOpen(true);
@@ -69,6 +156,7 @@ export default function FilterAndPDFGenerator() {
       setLoading(false);
     }
   };
+
   const handleClosePreview = () => {
     setIsPreviewOpen(false);
     if (pdfPreview) {
@@ -76,6 +164,7 @@ export default function FilterAndPDFGenerator() {
       setPdfPreview(null);
     }
   };
+
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
     const searchLower = searchTerm.toLowerCase();
@@ -86,17 +175,17 @@ export default function FilterAndPDFGenerator() {
         item.cnpj.includes(searchTerm)
     );
   }, [data, searchTerm]);
+
   const toggleSelection = (id: string) => {
     setSelectedItems((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
 
-
   return (
     <div>
       <Navbar />
-      <div className="flex min-h-screen min-w-scren justify-center items-center">
+      <div className="flex min-h-screen min-w-screen justify-center items-center">
         <Card className="w-[90%] max-w-6xl mx-auto p-6">
           <CardContent className="space-y-6">
             <FilterControls
@@ -111,6 +200,7 @@ export default function FilterAndPDFGenerator() {
               selectedCount={selectedItems.length}
               loading={loading}
             />
+
             <SearchBar
               value={searchTerm}
               onChange={setSearchTerm}
@@ -122,9 +212,11 @@ export default function FilterAndPDFGenerator() {
                   : "transportadora"
               } por nome, código ou CNPJ...`}
             />
+
             {error && (
               <div className="text-red-500 p-4 rounded bg-red-50">{error}</div>
             )}
+
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pulse">
                 {[...Array(6)].map((_, i) => (
@@ -147,6 +239,8 @@ export default function FilterAndPDFGenerator() {
                         entity={item}
                         selected={selectedItems.includes(item.id)}
                         onClick={() => toggleSelection(item.id)}
+                        onEdit={() => handleEdit(item)}
+                        onDelete={() => handleDelete(item.id)}
                       />
                     ))}
                   </div>
@@ -155,6 +249,31 @@ export default function FilterAndPDFGenerator() {
             )}
           </CardContent>
         </Card>
+
+        {/* Modal de edição */}
+        {/* {editingEntity && (
+          <Dialog open={!!editingEntity} onOpenChange={handleCancel}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar Entidade</DialogTitle>
+              </DialogHeader>
+              <EntityEditForm
+                entity={editingEntity}
+                onSave={handleSave}
+                onCancel={handleCancel}
+              />
+            </DialogContent>
+          </Dialog>
+        )} */}
+        {editingEntity && (
+          <EntityEditForm
+            entity={editingEntity}
+            onSave={handleSave}
+            onCancel={handleCancel}
+            isOpen={!!editingEntity}
+          />
+        )}
+
         <PDFPreviewModal
           isOpen={isPreviewOpen}
           onClose={handleClosePreview}
@@ -162,9 +281,8 @@ export default function FilterAndPDFGenerator() {
           onDownload={() => handleGeneratePDF(false)}
         />
       </div>
+
       <Footer />
     </div>
   );
 }
-
-

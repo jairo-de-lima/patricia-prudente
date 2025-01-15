@@ -20,20 +20,14 @@ const RegistrationForm = ({ onSubmit, initialData = {} }) => {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
-    // Atualizar a validação para checar apenas campos obrigatórios
-    const config = formConfigs[formType];
-    const allFields = [...config.fields.leftColumn];
-
-    const requiredFields = allFields
+    const requiredFields = config.fields.leftColumn
       .filter((field) => field.required && !data[field.id])
       .map((field) => field.label);
 
     if (requiredFields.length > 0) {
       toast({
         title: "Erro de validação",
-        description: `Os seguintes campos são obrigatórios: ${requiredFields.join(
-          ", "
-        )}`,
+        description: `Os seguintes campos são obrigatórios: ${requiredFields.join(", ")}`,
         duration: 4000,
       });
       return;
@@ -63,7 +57,6 @@ const RegistrationForm = ({ onSubmit, initialData = {} }) => {
         <CardHeader>
           <FormHeader formType={formType} setFormType={setFormType} />
         </CardHeader>
-
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <AnimatePresence mode="wait">
@@ -73,7 +66,6 @@ const RegistrationForm = ({ onSubmit, initialData = {} }) => {
                 initialData={initialData}
               />
             </AnimatePresence>
-
             <div className="flex items-center justify-center gap-4">
               <Button variant="outline" type="reset">
                 Limpar

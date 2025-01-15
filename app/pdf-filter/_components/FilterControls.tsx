@@ -20,12 +20,15 @@ interface FilterControlsProps {
   selectedCount: number;
   loading: boolean;
 }
+
 export const FilterControls = ({
   selectedType,
   onTypeChange,
   onPreviewPDF,
   onDownloadPDF,
   onRefresh,
+  searchTerm,
+  onSearchChange,
   disabled,
   selectedCount,
   loading,
@@ -41,10 +44,11 @@ export const FilterControls = ({
             <SelectContent>
               <SelectItem value="clientes">Clientes</SelectItem>
               <SelectItem value="fornecedores">Fornecedores</SelectItem>
-              <SelectItem value="transportadoras">Transportadoras</SelectItem>
+              <SelectItem value="transportadora">Transportadora</SelectItem>
             </SelectContent>
           </Select>
         </div>
+
         <div className="flex flex-wrap gap-2">
           <Button
             onClick={onPreviewPDF}
@@ -55,6 +59,7 @@ export const FilterControls = ({
             <Eye className="h-4 w-4 mr-2" />
             Visualizar {selectedCount > 0 && `(${selectedCount})`}
           </Button>
+
           <Button
             onClick={onDownloadPDF}
             disabled={disabled}
@@ -63,6 +68,7 @@ export const FilterControls = ({
             <Download className="h-4 w-4 mr-2" />
             Download {selectedCount > 0 && `(${selectedCount})`}
           </Button>
+
           <Button
             onClick={onRefresh}
             variant="outline"

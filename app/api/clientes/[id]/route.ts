@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "../../database";
+import { revalidatePath } from "next/cache";
 
 export async function GET(
   request: Request,
@@ -50,6 +51,7 @@ export async function PUT(
       where: { id: params.id },
       data: data,
     });
+    revalidatePath("/pdf-filter");
 
     return NextResponse.json(cliente, { status: 200 });
   } catch (error) {

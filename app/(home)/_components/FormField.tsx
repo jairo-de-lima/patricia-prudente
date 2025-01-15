@@ -1,5 +1,7 @@
 import { Label } from "@/app/_components/ui/label";
 import { Input } from "@/app/_components/ui/input";
+import { FieldConfig } from "./types";
+import InputMask from "react-input-mask"; // Importando o InputMask
 
 type FormFieldProps = {
   field: FieldConfig;
@@ -14,25 +16,39 @@ const FormField = ({ field, defaultValue = "" }: FormFieldProps) => (
     <div className="flex-1">
       {field.prefix ? (
         <div className="flex items-center">
-          <Input
+          <InputMask
             id={field.id}
             name={field.id}
-            type={field.type}
-            required={field.required}
+            mask={field.mask || ""}
             defaultValue={field.value || defaultValue}
-            placeholder={field.prefix}
-            className="flex-1"
-          />
+          >
+            {(inputProps) => (
+              <Input
+                {...inputProps}
+                type={field.type}
+                required={field.required}
+                placeholder={field.prefix}
+                className="flex-1"
+              />
+            )}
+          </InputMask>
         </div>
       ) : (
-        <Input
+        <InputMask
           id={field.id}
           name={field.id}
-          type={field.type}
-          required={field.required}
+          mask={field.mask || ""}
           defaultValue={field.value || defaultValue}
-          className="flex-1"
-        />
+        >
+          {(inputProps) => (
+            <Input
+              {...inputProps}
+              type={field.type}
+              required={field.required}
+              className="flex-1"
+            />
+          )}
+        </InputMask>
       )}
     </div>
   </div>
