@@ -33,9 +33,9 @@ const Navbar = () => {
             Filtrar
           </Link>
 
-          <Link href="/pedidosxlsx" className="hover:text-gray-300">
+          {/* <Link href="/pedidosxlsx" className="hover:text-gray-300">
             Pedidos
-          </Link>
+          </Link> */}
         </div>
 
         <div className="md:hidden">
@@ -61,14 +61,14 @@ const Navbar = () => {
                   </Link>
                 </MenubarItem>
 
-                <MenubarItem>
+                {/* <MenubarItem>
                   <Link
                     href="/pedidosxlsx"
                     className="block py-1 px-3 hover:text-gray-300"
                   >
                     Pedidos
                   </Link>
-                </MenubarItem>
+                </MenubarItem> */}
               </MenubarContent>
             </MenubarMenu>
           </Menubar>
