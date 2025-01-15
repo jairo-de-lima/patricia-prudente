@@ -12,6 +12,7 @@ import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
 import { ScrollArea } from "@/app/_components/ui/scroll-area";
 import { Cliente, Fornecedor, Transportadora } from "./types";
+import { applyMask } from "@/app/_components/ApplyMask";
 
 interface EntityEditFormProps<T> {
   entity: T;
@@ -35,7 +36,6 @@ const fieldLabels: Record<string, string> = {
   emailFinanceiro: "E-mail Financeiro",
   emailComercial: "E-mail Comercial",
   observacoes: "Observações",
-  // Adicione mais labels conforme necessário
 };
 
 export const EntityEditForm = <
@@ -52,9 +52,21 @@ export const EntityEditForm = <
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    let maskedValue = value;
+
+    // Aplica a máscara dependendo do campo
+    if (name === "cnpj") {
+      maskedValue = applyMask(value, "cnpj");
+    } else if (name === "telefone") {
+      maskedValue = applyMask(value, "tel");
+    } else if (name === "celular") {
+      maskedValue = applyMask(value, "tel");
+    } else if (name === "cep") {
+      maskedValue = applyMask(value, "cep");
+    }
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: maskedValue,
     }));
   };
 

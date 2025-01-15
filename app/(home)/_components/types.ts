@@ -6,6 +6,7 @@ type FieldConfig = {
   value: string;
   step?: string;
   required?: boolean;
+  maskType?: string;
 };
 
 type FormConfig = {

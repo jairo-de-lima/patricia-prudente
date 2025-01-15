@@ -105,14 +105,6 @@ export const generatePDF = async ({
     const labelWidth = fontRegular.widthOfTextAtSize(label, 12);
     const underscoreStart = x + labelWidth + 5;
 
-    // Draw underscore line
-    page.drawLine({
-      start: { x: underscoreStart, y: y - 2 },
-      end: { x: x + width, y: y - 2 },
-      thickness: 0.5,
-      color: rgb(0.7, 0.7, 0.7),
-    });
-
     if (value) {
       page.drawText(value, {
         x: underscoreStart,
@@ -160,8 +152,10 @@ export const generatePDF = async ({
     drawField("Suframa", data.suframa, marginLeft, yPosition, 200);
 
     yPosition -= lineHeight;
-    drawField("Transp", data.transp, marginLeft, yPosition, 200);
-    drawField("Tel", data.tel, marginLeft + 250, yPosition, 200);
+    if (data.transp || data.tel) {
+      drawField("Transp", data.transp, marginLeft, yPosition, 200);
+      drawField("Tel", data.tel, marginLeft + 250, yPosition, 200);
+    }
   } else if (
     "emailPedido" in data &&
     "emailFin" in data &&
