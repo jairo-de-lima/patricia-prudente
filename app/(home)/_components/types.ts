@@ -1,23 +1,24 @@
-type FieldConfig = {
+// Arquivo: types.ts
+export type FieldConfig = {
   id: string;
   label: string;
   type: string;
-  prefix: string;
-  value: string;
+  prefix?: string;
+  value?: string;
   step?: string;
   required?: boolean;
-  maskType?: string;
+  mask?: string; // Adicionando a propriedade mask
 };
 
-type FormConfig = {
+export type FormConfig = {
   title: string;
-  codLabel: string;
+  codLabel: boolean | string;
   dataCad: boolean;
-  value: string;
+  value?: string; // Tornando opcional
   fields: {
     leftColumn: FieldConfig[];
-    rightColumn: FieldConfig[];
-    extras: [];
-    obs: string;
+    rightColumn?: FieldConfig[]; // Tornando opcional
+    extras?: FieldConfig[]; // Corrigindo tipo e tornando opcional
+    obs?: boolean | string; // Tornando opcional e permitindo boolean
   };
 };
