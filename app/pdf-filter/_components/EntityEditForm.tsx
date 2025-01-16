@@ -11,6 +11,7 @@ import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
 import { ScrollArea } from "@/app/_components/ui/scroll-area";
+import InputMask from "react-input-mask"; // Adicionado InputMask
 import { Cliente, Fornecedor, Transportadora } from "./types";
 
 interface EntityEditFormProps<T> {
@@ -71,6 +72,15 @@ export const EntityEditForm = <
     return "text";
   };
 
+  const getFieldMask = (key: string): string | undefined => {
+    if (key === "cnpj") return "99.999.999/9999-99";
+    if (key === "cep") return "99999-999";
+    if (key === "telefone" || key === "celular") return "(99) 99999-9999";
+    if (key === "dataCad" || key === "dataRecebimento") return "99/99/9999";
+    if (key === "comissao") return "99.99%";
+    return undefined;
+  };
+
   const getEntityType = (entity: T): string => {
     if ("type" in entity) {
       return entity.type as string;
@@ -103,6 +113,7 @@ export const EntityEditForm = <
                 const label = fieldLabels[key] || key;
                 const isOptional = key.includes("?");
                 const fieldType = getFieldType(key, value);
+                const fieldMask = getFieldMask(key);
 
                 return (
                   <div key={key} className="space-y-2">
@@ -114,15 +125,34 @@ export const EntityEditForm = <
                         </span>
                       )}
                     </Label>
-                    <Input
-                      id={key}
-                      name={key}
-                      type={fieldType}
-                      value={value ?? ""}
-                      onChange={handleChange}
-                      className="w-full"
-                      placeholder={`Digite ${label.toLowerCase()}`}
-                    />
+                    {fieldMask ? (
+                      <InputMask
+                        mask={fieldMask}
+                        value={value ?? ""}
+                        onChange={handleChange}
+                      >
+                        {(inputProps) => (
+                          <Input
+                            {...inputProps}
+                            id={key}
+                            name={key}
+                            type={fieldType}
+                            className="w-full"
+                            placeholder={`Digite ${label.toLowerCase()}`}
+                          />
+                        )}
+                      </InputMask>
+                    ) : (
+                      <Input
+                        id={key}
+                        name={key}
+                        type={fieldType}
+                        value={value ?? ""}
+                        onChange={handleChange}
+                        className="w-full"
+                        placeholder={`Digite ${label.toLowerCase()}`}
+                      />
+                    )}
                   </div>
                 );
               })}

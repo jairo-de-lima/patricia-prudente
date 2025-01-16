@@ -131,8 +131,8 @@ export const generatePDF = async ({
   yPosition -= lineHeight;
 
   drawField("END", data.endereco, marginLeft + 2, yPosition, 200);
-  drawField("Nº", data.endNumero, marginLeft + 250, yPosition, 50);
-  drawField("CEP", data.cep, marginLeft + 350, yPosition, 150);
+  drawField("Nº", data.endNumero, marginLeft + 250, yPosition, 5);
+  drawField("CEP", data.cep, marginLeft + 250, yPosition, 200);
   yPosition -= lineHeight;
 
   if ("email" in data && "emailFin" in data && "suframa" in data) {
