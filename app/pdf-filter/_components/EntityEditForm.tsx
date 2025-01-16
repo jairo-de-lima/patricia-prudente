@@ -11,8 +11,8 @@ import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
 import { ScrollArea } from "@/app/_components/ui/scroll-area";
-import InputMask from "react-input-mask"; // Adicionado InputMask
 import { Cliente, Fornecedor, Transportadora } from "./types";
+import { applyMask } from "@/app/_components/ApplyMask";
 
 interface EntityEditFormProps<T> {
   entity: T;
@@ -36,7 +36,6 @@ const fieldLabels: Record<string, string> = {
   emailFinanceiro: "E-mail Financeiro",
   emailComercial: "E-mail Comercial",
   observacoes: "Observações",
-  // Adicione mais labels conforme necessário
 };
 
 export const EntityEditForm = <
@@ -53,9 +52,21 @@ export const EntityEditForm = <
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    let maskedValue = value;
+
+    // Aplica a máscara dependendo do campo
+    if (name === "cnpj") {
+      maskedValue = applyMask(value, "cnpj");
+    } else if (name === "telefone") {
+      maskedValue = applyMask(value, "tel");
+    } else if (name === "celular") {
+      maskedValue = applyMask(value, "tel");
+    } else if (name === "cep") {
+      maskedValue = applyMask(value, "cep");
+    }
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: maskedValue,
     }));
   };
 
@@ -70,15 +81,6 @@ export const EntityEditForm = <
     if (key.includes("cnpj")) return "text";
     if (typeof value === "number") return "number";
     return "text";
-  };
-
-  const getFieldMask = (key: string): string | undefined => {
-    if (key === "cnpj") return "99.999.999/9999-99";
-    if (key === "cep") return "99999-999";
-    if (key === "telefone" || key === "celular") return "(99) 99999-9999";
-    if (key === "dataCad" || key === "dataRecebimento") return "99/99/9999";
-    if (key === "comissao") return "99.99%";
-    return undefined;
   };
 
   const getEntityType = (entity: T): string => {
@@ -113,7 +115,6 @@ export const EntityEditForm = <
                 const label = fieldLabels[key] || key;
                 const isOptional = key.includes("?");
                 const fieldType = getFieldType(key, value);
-                const fieldMask = getFieldMask(key);
 
                 return (
                   <div key={key} className="space-y-2">
@@ -125,34 +126,15 @@ export const EntityEditForm = <
                         </span>
                       )}
                     </Label>
-                    {fieldMask ? (
-                      <InputMask
-                        mask={fieldMask}
-                        value={value ?? ""}
-                        onChange={handleChange}
-                      >
-                        {(inputProps) => (
-                          <Input
-                            {...inputProps}
-                            id={key}
-                            name={key}
-                            type={fieldType}
-                            className="w-full"
-                            placeholder={`Digite ${label.toLowerCase()}`}
-                          />
-                        )}
-                      </InputMask>
-                    ) : (
-                      <Input
-                        id={key}
-                        name={key}
-                        type={fieldType}
-                        value={value ?? ""}
-                        onChange={handleChange}
-                        className="w-full"
-                        placeholder={`Digite ${label.toLowerCase()}`}
-                      />
-                    )}
+                    <Input
+                      id={key}
+                      name={key}
+                      type={fieldType}
+                      value={value ?? ""}
+                      onChange={handleChange}
+                      className="w-full"
+                      placeholder={`Digite ${label.toLowerCase()}`}
+                    />
                   </div>
                 );
               })}

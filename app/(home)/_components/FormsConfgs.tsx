@@ -1,3 +1,4 @@
+"use client";
 export const formConfigs = {
   cliente: {
     title: "Cadastro de Cliente",
@@ -8,11 +9,14 @@ export const formConfigs = {
       type: "text",
       required: true,
       mask: "99/99/9999", // Máscara para data no formato dd/mm/aaaa
-      defaultValue: new Date().toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }).replace(/(\d+)\/(\d+)\/(\d+)/, "$2/$1/$3"),
+      defaultValue: new Date()
+        .toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          timeZone: "UTC",
+        })
+        .replace(/(\d+)\/(\d+)\/(\d+)/, "$2/$1/$3"),
     },
     fields: {
       leftColumn: [
@@ -51,7 +55,6 @@ export const formConfigs = {
               label: "Nº",
               type: "text",
               required: true,
-              mask: "999",
             },
             {
               id: "cep",
@@ -105,9 +108,21 @@ export const formConfigs = {
             },
           ],
         },
-        { id: "suframa", label: "Suframa", type: "text", require: false, mask: "99999999" },
+        {
+          id: "suframa",
+          label: "Suframa",
+          type: "text",
+          require: false,
+          mask: "99999999",
+        },
         { id: "transp", label: "Transportadora", type: "text" },
-        { id: "tel", label: "Telefone", type: "tel", prefix: "(11)", mask: "(99) 9999-9999" },
+        {
+          id: "tel",
+          label: "Telefone",
+          type: "tel",
+          prefix: "(11)",
+          mask: "(99) 9999-9999",
+        },
       ],
     },
   },
@@ -152,7 +167,6 @@ export const formConfigs = {
               label: "Nº",
               type: "text",
               required: true,
-              mask: "999",
             },
             {
               id: "cep",
@@ -191,7 +205,12 @@ export const formConfigs = {
           type: "email",
           required: false,
         },
-        { id: "emailFin", label: "E-mail Fina:", type: "email", required: true },
+        {
+          id: "emailFin",
+          label: "E-mail Fina:",
+          type: "email",
+          required: true,
+        },
       ],
       extras: [
         {
@@ -208,7 +227,7 @@ export const formConfigs = {
           type: "text",
           required: false,
           mask: "99/99/9999",
-          defaultValue: "", 
+          defaultValue: "",
         },
       ],
 
@@ -250,15 +269,12 @@ export const formConfigs = {
               label: "END",
               type: "text",
               required: false,
-              defaultValue: "Rua Exemplo",
             },
             {
               id: "endNumero",
               label: "Nº",
               type: "text",
               required: false,
-              defaultValue: "123",
-              mask: "999",
             },
             {
               id: "cep",

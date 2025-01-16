@@ -59,6 +59,7 @@ export const generatePDF = async ({
       ? "Fornecedor"
       : "Transportadora"
   }`;
+
   const titleY = logoY - 50;
   const titleWidth = fontTitle.widthOfTextAtSize(formTitle, 14);
   page.drawText(formTitle, {
@@ -70,7 +71,7 @@ export const generatePDF = async ({
   });
 
   // Date field
-  const formattedDate = format(new Date(selectedData[0].dataCad), "dd/MM/yyyy");
+  const formattedDate = format(selectedData[0].dataCad, "dd/MM/yyyy");
   page.drawText(`DATA CAD: ${formattedDate}`, {
     x: pageWidth - 150,
     y: titleY,
@@ -84,10 +85,14 @@ export const generatePDF = async ({
   const lineHeight = 25;
   const labelColor = rgb(0.5, 0, 0.5);
 
-  const data = selectedData[0];
-
-  // Function to draw a field
-  const drawField = (label, value, x, y, width = 200) => {
+  const drawField = (
+    label: string,
+    value: string | undefined,
+    x: number,
+    y: number,
+    width = 200
+  ) => {
+    // Draw label
     page.drawText(label, {
       x,
       y,
@@ -96,26 +101,21 @@ export const generatePDF = async ({
       color: labelColor,
     });
 
-    // Remover estas linhas de desenhar sublinhado
-    // const labelWidth = fontRegular.widthOfTextAtSize(label, 12);
-    // const underscoreStart = x + labelWidth + 5;
-
-    // page.drawLine({
-    //  start: { x: underscoreStart, y: y - 2 },
-    //  end: { x: x + width, y: y - 2 },
-    //  thickness: 0.5,
-    //  color: rgb(0.7, 0.7, 0.7),
-    // });
+    // Calculate label width
+    const labelWidth = fontRegular.widthOfTextAtSize(label, 12);
+    const underscoreStart = x + labelWidth + 5;
 
     if (value) {
       page.drawText(value, {
-        x: x + 100, // Ajuste a posição do valor conforme necessário
+        x: underscoreStart,
         y,
         size: 12,
         font: fontRegular,
       });
     }
   };
+
+  const data = selectedData[0];
 
   // Common fields for all types
   if (data.codigo) {
@@ -130,9 +130,9 @@ export const generatePDF = async ({
   drawField("IE", data.ie, marginLeft + 250, yPosition, 200);
   yPosition -= lineHeight;
 
-  drawField("END", data.endereco, marginLeft + 2, yPosition, 200);
-  drawField("Nº", data.endNumero, marginLeft + 250, yPosition, 5);
-  drawField("CEP", data.cep, marginLeft + 250, yPosition, 200);
+  drawField("END", data.endereco, marginLeft, yPosition, 200);
+  drawField("Nº", data.endNumero, marginLeft + 250, yPosition, 50);
+  drawField("CEP", data.cep, marginLeft + 350, yPosition, 150);
   yPosition -= lineHeight;
 
   if ("email" in data && "emailFin" in data && "suframa" in data) {
@@ -152,9 +152,15 @@ export const generatePDF = async ({
     drawField("Suframa", data.suframa, marginLeft, yPosition, 200);
 
     yPosition -= lineHeight;
-    drawField("Transp", data.transp, marginLeft, yPosition, 200);
-    drawField("Tel", data.tel, marginLeft + 250, yPosition, 200);
-  } else if ("emailPedido" in data && "emailFin" in data && "comissao" in data) {
+    if (data.transp || data.tel) {
+      drawField("Transp", data.transp, marginLeft, yPosition, 200);
+      drawField("Tel", data.tel, marginLeft + 250, yPosition, 200);
+    }
+  } else if (
+    "emailPedido" in data &&
+    "emailFin" in data &&
+    "comissao" in data
+  ) {
     // Fornecedor fields
     drawField("Tel Fixo", data.telefoneFixo, marginLeft, yPosition, 200);
     drawField("Tel Cel", data.celular, marginLeft + 250, yPosition, 200);
@@ -164,9 +170,21 @@ export const generatePDF = async ({
     drawField("Email Fina", data.emailFin, marginLeft + 250, yPosition, 200);
     yPosition -= lineHeight;
 
-    drawField("Comissão", `${data.comissao}%`, marginLeft, yPosition, 200);
-    yPosition -= lineHeight;
+    if (data.comissao) {
+      drawField("Comissão", `${data.comissao}%`, marginLeft, yPosition, 200);
+    } else {
+      drawField("Comissão", "0%", marginLeft, yPosition, 200);
+    }
 
+    drawField(
+      "Data Recebimento",
+      format(new Date(data.dataRecebimento), "dd/MM/yyyy"),
+      marginLeft + 250,
+      yPosition,
+      200
+    );
+
+    yPosition -= lineHeight;
     drawField("OBS", data.obs, marginLeft, yPosition, 400);
   } else {
     // Transportadora fields

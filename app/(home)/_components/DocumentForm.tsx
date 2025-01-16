@@ -1,10 +1,9 @@
 // Arquivo: DocumentForm.tsx
 "use client";
 
-import React, { useState } from 'react';
-import InputMask from 'react-input-mask';
-import { FieldConfig, FormConfig } from './types';
-
+import React, { useState } from "react";
+import InputMask from "react-input-mask";
+import { FieldConfig, FormConfig } from "./types";
 
 interface DocumentFormProps {
   config: FormConfig;
@@ -14,7 +13,10 @@ interface DocumentFormProps {
 const DocumentForm: React.FC<DocumentFormProps> = ({ config, onSubmit }) => {
   const [formData, setFormData] = useState<Record<string, string>>({});
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: string
+  ) => {
     setFormData({ ...formData, [id]: e.target.value });
   };
 
@@ -24,18 +26,25 @@ const DocumentForm: React.FC<DocumentFormProps> = ({ config, onSubmit }) => {
   };
 
   const renderField = (field: FieldConfig) => {
-    if (field.type === 'text' || field.type === 'tel') {
+    if (field.type === "text" || field.type === "tel") {
       return (
         <InputMask
-          mask={field.mask || ''}
-          value={formData[field.id] || ''}
+          mask={field.mask || ""}
+          value={formData[field.id] || ""}
           onChange={(e) => handleInputChange(e, field.id)}
         >
           {(inputProps) => <input {...inputProps} type={field.type} />}
         </InputMask>
       );
     }
-    return <input type={field.type} id={field.id} value={formData[field.id] || ''} onChange={(e) => handleInputChange(e, field.id)} />;
+    return (
+      <input
+        type={field.type}
+        id={field.id}
+        value={formData[field.id] || ""}
+        onChange={(e) => handleInputChange(e, field.id)}
+      />
+    );
   };
 
   return (

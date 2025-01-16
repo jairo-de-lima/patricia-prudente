@@ -1,4 +1,5 @@
 // Arquivo: types.ts
+"use client";
 export type FieldConfig = {
   id: string;
   label: string;

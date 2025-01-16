@@ -13,6 +13,6 @@ app.prepare().then(() => {
     middleware(req, res, () => handle(req, res, parsedUrl));
   }).listen(3000, (err) => {
     if (err) throw err;
-    console.log('> Ready on https://animated-eureka-x595r7xx7rg6hpg7p-3000.app.github.dev/');
+    console.log('> Ready on https://literate-trout-5grg7q6wqvg4h6qw-3000.app.github.dev/');
   });
 });

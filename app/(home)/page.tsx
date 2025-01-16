@@ -1,13 +1,14 @@
 "use client";
+
+import Footer from "../_components/Footer";
+import Navbar from "../_components/Navbar";
 import RegistrationForm from "./_components/form";
 
-const Form = () => {
+export default function HomePage() {
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gray-50 p-4">
-
-      <RegistrationForm onSubmit={(data: any) => console.log(data)} />
-    </div>
+    <main className="flex min-h-screen min-w-screen flex-col ">
+    
+      <RegistrationForm />
+    </main>
   );
-};
-
-export default Form;
+}

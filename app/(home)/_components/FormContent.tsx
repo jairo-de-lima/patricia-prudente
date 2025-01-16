@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import FormField from "./FormField";
 import { Input } from "@/app/_components/ui/input";

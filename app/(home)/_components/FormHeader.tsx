@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import FormSelector from "./FormSelector";
 
