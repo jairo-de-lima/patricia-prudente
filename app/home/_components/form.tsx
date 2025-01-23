@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card, CardContent, CardHeader } from "@/app/_components/ui/card";
 import { Button } from "@/app/_components/ui/button";
@@ -19,8 +19,24 @@ const formVariants = {
 
 const RegistrationForm = ({ initialData = {} }) => {
   const [formType, setFormType] = useState("cliente");
+  const [codigo, setCodigo] = useState("");
   const { toast } = useToast();
   const config = formConfigs[formType];
+
+  const fetchCodigo = async () => {
+    try {
+      const response = await fetch("/api/clientes/count"); // Endpoint para contar os clientes
+      const totalClientes = await response.json();
+      setCodigo((totalClientes + 1).toString()); // Define o próximo código
+      console.log("Código:", totalClientes + 1);
+    } catch (error) {
+      console.error("Erro ao buscar o código:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCodigo();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,7 +62,7 @@ const RegistrationForm = ({ initialData = {} }) => {
     }
 
     try {
-      await createRegistration({ type: formType, ...data });
+      await createRegistration({ type: formType, codigo, ...data });
       e.target.reset();
       toast({
         title: "Sucesso",
@@ -56,11 +72,12 @@ const RegistrationForm = ({ initialData = {} }) => {
     } catch (error) {
       toast({
         title: "Erro",
-        description: error.message || "Erro ao realizar cadastro",
+        description: "Erro ao realizar cadastro",
         duration: 4000,
       });
       console.error("Error submitting form:", error);
     }
+    fetchCodigo();
   };
 
   return (
@@ -86,7 +103,11 @@ const RegistrationForm = ({ initialData = {} }) => {
                 exit="exit"
                 transition={{ duration: 0.3 }}
               >
-                <FormContent config={config} initialData={initialData} />
+                <FormContent
+                  config={config}
+                  initialData={initialData}
+                  clientCod={{ codigo: codigo }}
+                />
               </motion.div>
             </AnimatePresence>
 

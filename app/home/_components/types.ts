@@ -14,6 +14,7 @@ export type FieldConfig = {
 export type FormConfig = {
   title: string;
   codLabel: boolean | string;
+  clientLabel?: boolean | string; // Tornando opcional e permitindo boolean
   dataCad: boolean;
   value?: string; // Tornando opcional
   fields: {

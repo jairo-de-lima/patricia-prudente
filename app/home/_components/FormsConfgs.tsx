@@ -2,7 +2,7 @@
 export const formConfigs = {
   cliente: {
     title: "Cadastro de Cliente",
-    codLabel: false,
+    clientLabel: "Código do Cliente",
     dataCad: {
       id: "dataCad",
       label: "Data de Cadastro",
@@ -99,7 +99,7 @@ export const formConfigs = {
           id: "emails",
           isRow: true,
           fields: [
-            { id: "email", label: "E-mail", type: "email", required: true },
+            { id: "email", label: "E-mail", type: "email", required: false },
             {
               id: "emailFin",
               label: "E-mail Financeiro",
@@ -187,7 +187,7 @@ export const formConfigs = {
               type: "tel",
               required: false,
               prefix: "( )",
-              mask: "(99) 9999-9999",
+              mask: "(99) 9999-99999",
             },
             {
               id: "celular",
@@ -303,7 +303,7 @@ export const formConfigs = {
               type: "tel",
               required: false,
               prefix: "(11)",
-              mask: "(99) 9999-9999",
+              mask: "(99) 9999-99999",
               defaultValue: "",
             },
             {

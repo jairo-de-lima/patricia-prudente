@@ -83,7 +83,7 @@ export async function createRegistration(data: any) {
         await prisma.cliente.create({
           data: {
             dataCad: data.dataCad ? new Date(data.dataCad) : new Date(), // Garantir que dataCad seja um Date
-            codigo: data.codigo || null,
+            codigo: data.codigo,
             razaoSocial: data.razaoSocial,
             cnpj: data.cnpj,
             ie: data.ie,

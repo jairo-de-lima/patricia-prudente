@@ -8,9 +8,14 @@ import { FormConfig } from "./types";
 type FormContentProps = {
   config: FormConfig;
   initialData?: Record<string, string>;
+  clientCod: Record<string, string>;
 };
 
-const FormContent = ({ config, initialData = {} }: FormContentProps) => {
+const FormContent = ({
+  config,
+  initialData,
+  clientCod = {},
+}: FormContentProps) => {
   const renderFields = (field: any) => {
     if (field.isRow) {
       return (
@@ -19,7 +24,7 @@ const FormContent = ({ config, initialData = {} }: FormContentProps) => {
             <div key={subField.id} className="md:flex-1 w-full sm:w-1/2">
               <FormField
                 field={subField}
-                defaultValue={initialData[subField.id]}
+                defaultValue={initialData?.[subField.id]}
               />
             </div>
           ))}
@@ -31,7 +36,7 @@ const FormContent = ({ config, initialData = {} }: FormContentProps) => {
       <FormField
         key={field.id}
         field={field}
-        defaultValue={initialData[field.id]}
+        defaultValue={initialData?.[field.id]}
       />
     );
   };
@@ -54,7 +59,7 @@ const FormContent = ({ config, initialData = {} }: FormContentProps) => {
               type="date"
               className="w-36"
               name="dataCad"
-              defaultValue={initialData.dataCad || ""}
+              defaultValue={initialData?.dataCad || ""}
             />
           </div>
         )}
@@ -68,7 +73,20 @@ const FormContent = ({ config, initialData = {} }: FormContentProps) => {
             className="w-40"
             id="codigo"
             name="codigo"
-            defaultValue={initialData.codigo || ""}
+            defaultValue={initialData?.codigo || ""}
+          />
+        </div>
+      )}
+
+      {config.clientLabel && (
+        <div className="flex items-center gap-2">
+          <Label htmlFor="codigo">{config.clientLabel}:</Label>
+          <Input
+            type="text"
+            id="codigo"
+            name="codigo"
+            value={clientCod.codigo} // Exibe o código no input
+            disabled // Desativa o campo
           />
         </div>
       )}
@@ -107,7 +125,7 @@ const FormContent = ({ config, initialData = {} }: FormContentProps) => {
                 prefix: "",
                 value: "",
               }}
-              defaultValue={initialData.obs}
+              defaultValue={initialData?.obs}
             />
           </motion.div>
         )}

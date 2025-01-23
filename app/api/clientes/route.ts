@@ -48,9 +48,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // Criação do cliente no banco de dados
+    // Contar quantos clientes já estão cadastrados
+    const totalClientes = await prisma.cliente.count();
+
+    // Adicionar o campo código automaticamente (incrementando em 1)
+    const codigo = (totalClientes + 1).toString();
+
+    // Adicionar o campo código ao objeto data
+    const clienteData = {
+      ...data,
+      codigo,
+    };
+
+    // Criar o cliente no banco de dados
     const cliente = await prisma.cliente.create({
-      data,
+      data: clienteData,
     });
 
     return NextResponse.json(cliente, { status: 201 });
