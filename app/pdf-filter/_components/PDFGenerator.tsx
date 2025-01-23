@@ -152,8 +152,60 @@ export const generatePDF = async ({
     drawField("Suframa", data.suframa, marginLeft, yPosition, 200);
 
     yPosition -= lineHeight;
-    if (data.transp || data.tel) {
-      drawField("Transp", data.transp, marginLeft, yPosition, 200);
+    if (data.transp) {
+      const transpLabel = "Transp:";
+      const transpValue = data.transp;
+      const transpWidth = 200; // Largura máxima para o texto
+      const lineIndent = marginLeft + 50; // Define onde as informações começam (ao lado do rótulo)
+
+      // Desenha o rótulo "Transp:"
+      page.drawText(transpLabel, {
+        x: marginLeft,
+        y: yPosition,
+        size: 12,
+        font: fontRegular,
+        color: labelColor,
+      });
+
+      // Divide o texto do campo "Transp" em várias linhas, se necessário
+      const words = transpValue.split(" ");
+      let currentLine = "";
+      let transpY = yPosition;
+
+      for (const word of words) {
+        const testLine = currentLine + word + " ";
+        const testWidth = fontRegular.widthOfTextAtSize(testLine, 12);
+
+        if (testWidth > transpWidth) {
+          // Desenha a linha atual ao lado do rótulo ou na linha de baixo
+          page.drawText(currentLine.trim(), {
+            x: lineIndent,
+            y: transpY,
+            size: 12,
+            font: fontRegular,
+          });
+          currentLine = word + " ";
+          transpY -= lineHeight; // Vai para a próxima linha
+        } else {
+          currentLine = testLine;
+        }
+      }
+
+      // Desenha a última linha
+      if (currentLine.trim()) {
+        page.drawText(currentLine.trim(), {
+          x: lineIndent,
+          y: transpY,
+          size: 12,
+          font: fontRegular,
+        });
+      }
+
+      // Atualiza o yPosition para a próxima seção
+      yPosition = transpY - lineHeight;
+    }
+
+    if (data.tel) {
       drawField("Tel", data.tel, marginLeft + 250, yPosition, 200);
     }
   } else if (

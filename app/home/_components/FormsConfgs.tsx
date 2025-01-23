@@ -81,9 +81,9 @@ export const formConfigs = {
               id: "telefoneFixo",
               label: "Tel Fixo",
               type: "tel",
-              required: true,
+              required: false,
               prefix: "(11)",
-              mask: "(99) 9999-9999",
+              mask: "(99) 99999-9999",
             },
             {
               id: "celular",

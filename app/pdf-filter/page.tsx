@@ -167,13 +167,20 @@ export default function FilterAndPDFGenerator() {
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
+
     const searchLower = searchTerm.toLowerCase();
-    return data.filter(
-      (item) =>
-        item.razaoSocial.toLowerCase().includes(searchLower) ||
-        item.codigo.toLowerCase().includes(searchLower) ||
-        item.cnpj.includes(searchTerm)
-    );
+
+    return data.filter((item) => {
+      const razaoSocial = item.razaoSocial?.toLowerCase() || "";
+      const codigo = item.codigo?.toLowerCase() || "";
+      const cnpj = item.cnpj || "";
+
+      return (
+        razaoSocial.includes(searchLower) ||
+        codigo.includes(searchLower) ||
+        cnpj.includes(searchTerm)
+      );
+    });
   }, [data, searchTerm]);
 
   const toggleSelection = (id: string) => {
