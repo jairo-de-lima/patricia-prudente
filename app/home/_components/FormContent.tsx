@@ -79,14 +79,14 @@ const FormContent = ({
       )}
 
       {config.clientLabel && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ">
           <Label htmlFor="codigo">{config.clientLabel}:</Label>
           <Input
-            type="text"
             id="codigo"
             name="codigo"
             value={clientCod.codigo} // Exibe o código no input
             disabled // Desativa o campo
+            className="w-14"
           />
         </div>
       )}
