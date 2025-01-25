@@ -13,6 +13,8 @@ import { Label } from "@/app/_components/ui/label";
 import { ScrollArea } from "@/app/_components/ui/scroll-area";
 import { Cliente, Fornecedor, Transportadora } from "./types";
 import { applyMask } from "@/app/_components/ApplyMask";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface EntityEditFormProps<T> {
   entity: T;
@@ -57,7 +59,7 @@ export const EntityEditForm = <
     // Aplica a máscara dependendo do campo
     if (name === "cnpj") {
       maskedValue = applyMask(value, "cnpj");
-    } else if (name === "telefone") {
+    } else if (name === "telefoneFixo") {
       maskedValue = applyMask(value, "tel");
     } else if (name === "celular") {
       maskedValue = applyMask(value, "tel");
@@ -112,6 +114,18 @@ export const EntityEditForm = <
                   return null;
                 }
 
+                // verifica se e uma string no valor de data ISO
+                const isISODateString =
+                  typeof value === "string" &&
+                  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value);
+
+                // formata a data em formato ISO para o formato dd/MM/yyyy, HH:mm:ss
+                const formattedValue = isISODateString
+                  ? format(new Date(value), "dd/MM/yyyy, HH:mm:ss", {
+                      locale: ptBR,
+                    })
+                  : value;
+
                 const label = fieldLabels[key] || key;
                 const isOptional = key.includes("?");
                 const fieldType = getFieldType(key, value);
@@ -130,7 +144,7 @@ export const EntityEditForm = <
                       id={key}
                       name={key}
                       type={fieldType}
-                      value={value ?? ""}
+                      value={formattedValue ?? ""}
                       onChange={handleChange}
                       className="w-full"
                       placeholder={`Digite ${label.toLowerCase()}`}

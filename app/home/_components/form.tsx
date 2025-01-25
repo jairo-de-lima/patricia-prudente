@@ -28,7 +28,6 @@ const RegistrationForm = ({ initialData = {} }) => {
       const response = await fetch("/api/clientes/count"); // Endpoint para contar os clientes
       const totalClientes = await response.json();
       setCodigo((totalClientes + 1).toString()); // Define o próximo código
-      console.log("Código:", totalClientes + 1);
     } catch (error) {
       console.error("Erro ao buscar o código:", error);
     }
@@ -62,7 +61,12 @@ const RegistrationForm = ({ initialData = {} }) => {
     }
 
     try {
-      await createRegistration({ type: formType, codigo, ...data });
+      const dataToSend = {
+        type: formType,
+        ...data,
+        ...(formType === "cliente" && { codigo }),
+      };
+      await createRegistration(dataToSend);
       e.target.reset();
       toast({
         title: "Sucesso",

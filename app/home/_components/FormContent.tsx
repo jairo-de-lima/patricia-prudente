@@ -8,14 +8,10 @@ import { FormConfig } from "./types";
 type FormContentProps = {
   config: FormConfig;
   initialData?: Record<string, string>;
-  clientCod: Record<string, string>;
+  clientCod: { codigo: string };
 };
 
-const FormContent = ({
-  config,
-  initialData,
-  clientCod = {},
-}: FormContentProps) => {
+const FormContent = ({ config, initialData, clientCod }: FormContentProps) => {
   const renderFields = (field: any) => {
     if (field.isRow) {
       return (

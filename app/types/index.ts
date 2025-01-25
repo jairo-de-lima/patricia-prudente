@@ -10,6 +10,7 @@ export type Cliente = {
   cep: string;
   cidade: string;
   estado: string;
+  bairro?: string;
   telefoneFixo?: string;
   celular?: string;
   email?: string;
@@ -32,6 +33,9 @@ export type Fornecedor = {
   ie: string; // Inscrição Estadual, único
   endereco: string;
   endNumero: string;
+  cidade?: string;
+  estado?: string;
+  bairro?: string;
   cep: string;
   telefoneFixo?: string;
   celular?: string;
@@ -58,6 +62,7 @@ export type Transportadora = {
   cep: string;
   cidade: string;
   estado: string;
+  bairro?: string;
   telefoneFixo?: string;
   celular?: string;
   email?: string;

@@ -69,8 +69,9 @@ export const formConfigs = {
           id: "localizacao",
           isRow: true,
           fields: [
-            { id: "cidade", label: "CIDADE", type: "text", required: true },
-            { id: "estado", label: "ESTADO", type: "text", required: true },
+            { id: "cidade", label: "CIDADE", type: "text", required: false },
+            { id: "estado", label: "ESTADO", type: "text", required: false },
+            { id: "bairro", label: "BAIRRO", type: "text", required: false },
           ],
         },
         {
@@ -175,6 +176,15 @@ export const formConfigs = {
               required: true,
               mask: "99999-999",
             },
+          ],
+        },
+        {
+          id: "localizacao",
+          isRow: true,
+          fields: [
+            { id: "cidade", label: "CIDADE", type: "text", required: false },
+            { id: "estado", label: "ESTADO", type: "text", required: false },
+            { id: "bairro", label: "BAIRRO", type: "text", required: false },
           ],
         },
         {
@@ -291,6 +301,7 @@ export const formConfigs = {
           fields: [
             { id: "cidade", label: "CIDADE", type: "text", required: false },
             { id: "estado", label: "ESTADO", type: "text", required: false },
+            { id: "bairro", label: "BAIRRO", type: "text", required: false },
           ],
         },
         {
