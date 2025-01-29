@@ -25,17 +25,38 @@ const RegistrationForm = ({ initialData = {} }) => {
 
   const fetchCodigo = async () => {
     try {
-      const response = await fetch("/api/clientes/count"); // Endpoint para contar os clientes
-      const totalClientes = await response.json();
-      setCodigo((totalClientes + 1).toString()); // Define o próximo código
+      // Criando um mapeamento para os valores corretos dos endpoints
+      const endpointMapping = {
+        cliente: "clientes", // 'cliente' mapeado para 'clientes'
+        fornecedor: "fornecedores", // 'fornecedor' mapeado para 'fornecedores'
+        transportadora: "transportadora", // 'transportadora' já está correto
+      };
+
+      // Usando o mapeamento para garantir o endpoint correto
+      const endpoint = endpointMapping[formType];
+
+      if (!endpoint) {
+        throw new Error("Tipo de cadastro inválido");
+      }
+
+      // Fazendo a requisição com o endpoint correto
+      const response = await fetch(`/api/${endpoint}/count`);
+
+      if (!response.ok) {
+        throw new Error("Erro ao buscar o código");
+      }
+
+      const data = await response.json();
+      setCodigo((data + 1).toString()); // Define o próximo código
     } catch (error) {
       console.error("Erro ao buscar o código:", error);
     }
   };
 
   useEffect(() => {
+    console.log("Fetching código para o tipo:", formType); // Verificar se formType está sendo alterado
     fetchCodigo();
-  }, []);
+  }, [formType]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,7 +85,7 @@ const RegistrationForm = ({ initialData = {} }) => {
       const dataToSend = {
         type: formType,
         ...data,
-        ...(formType === "cliente" && { codigo }),
+        codigo,
       };
       await createRegistration(dataToSend);
       e.target.reset();

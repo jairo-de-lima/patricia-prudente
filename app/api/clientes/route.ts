@@ -48,8 +48,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Adicionar o campo código ao objeto data
-
     // Criar o cliente no banco de dados
     const cliente = await prisma.cliente.create({
       data,

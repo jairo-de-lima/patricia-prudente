@@ -19,22 +19,18 @@ export async function POST(request: Request) {
     const data = await request.json();
 
     // Validar se os campos obrigatórios estão presentes
-    if (!data.nome || !data.comissao || !data.dataRecebimento) {
-      return NextResponse.json(
-        { error: "Campos obrigatórios estão faltando" },
-        { status: 400 }
-      );
-    }
+    const requiredFields = ["razaoSocial", "cnpj", "ie"];
 
-    // Garantir que comissao seja um número e dataRecebimento uma data válida
-    const comissao = parseFloat(data.comissao);
-    const dataRecebimento = new Date(data.dataRecebimento);
+    const missingFields = requiredFields.filter(
+      (field) => !data[field] || String(data[field]).trim() === ""
+    );
 
-    if (isNaN(comissao) || isNaN(dataRecebimento.getTime())) {
+    if (missingFields.length > 0) {
       return NextResponse.json(
         {
-          error:
-            "Dados inválidos: comissao deve ser numérica e dataRecebimento deve ser uma data válida",
+          error: `Os campos obrigatórios estão faltando: ${missingFields.join(
+            ", "
+          )}`,
         },
         { status: 400 }
       );
@@ -42,18 +38,14 @@ export async function POST(request: Request) {
 
     // Criar o fornecedor no banco de dados
     const fornecedor = await prisma.fornecedor.create({
-      data: {
-        ...data,
-        comissao,
-        dataRecebimento,
-      },
+      data,
     });
 
     return NextResponse.json(fornecedor, { status: 201 });
   } catch (error) {
-    console.error("Erro ao criar fornecedor:", error);
+    console.error("Error creating fornecedor:", error);
     return NextResponse.json(
-      { error: "Erro ao criar fornecedor" },
+      { error: "Error creating fornecedor" },
       { status: 500 }
     );
   }

@@ -83,10 +83,11 @@ const FormContent = ({
         <div className="flex items-center gap-2">
           <Label htmlFor="codigo">{config.codLabel}:</Label>
           <Input
-            className="w-40"
             id="codigo"
             name="codigo"
-            defaultValue={initialData?.codigo || ""}
+            value={clientCod.codigo}
+            disabled
+            className="w-14"
           />
         </div>
       )}

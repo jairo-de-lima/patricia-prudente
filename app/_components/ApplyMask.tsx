@@ -5,6 +5,16 @@ export const applyMask = (value: string, mask: string): string => {
   const cleanValue = value.replace(/\D/g, "");
 
   switch (mask) {
+    case "comissao": {
+      // Limita a 5 dígitos para permitir 100,00%
+      const limitedValue = cleanValue.slice(0, 5);
+
+      // Adiciona a vírgula para separar as casas decimais
+      const formattedValue = limitedValue.replace(/(\d+)(\d{2})$/, "$1,$2");
+
+      return `${formattedValue}%`;
+    }
+
     case "cep":
       return cleanValue.replace(/(\d{5})(\d)/, "$1-$2").slice(0, 9);
 
@@ -17,7 +27,7 @@ export const applyMask = (value: string, mask: string): string => {
           /^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d{0,2})/,
           "$1.$2.$3/$4-$5"
         )
-        .slice(0, 17);
+        .slice(0, 18);
 
     case "tel": {
       // Limita a 11 dígitos (máximo para celular)
