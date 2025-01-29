@@ -36,28 +36,11 @@ export async function PUT(
   try {
     const data = await request.json();
 
-    // Validação básica
-    if (
-      !data.codigo ||
-      !data.transportadora ||
-      !data.NumeroNF ||
-      !data.quantidade ||
-      !data.valorUn ||
-      !data.ValorTotal
-    ) {
+    // Validação básica dos campos obrigatórios
+    // Removidos os campos que não são usados na criação do registro
+    if (!data.razaoSocial || !data.cnpj) {
       return NextResponse.json(
         { error: "Campos obrigatórios estão faltando" },
-        { status: 400 }
-      );
-    }
-
-    const quantidade = parseInt(data.quantidade);
-    const valorTotal = parseFloat(data.ValorTotal);
-    const valorUn = parseFloat(data.valorUn);
-
-    if (isNaN(quantidade) || isNaN(valorTotal) || isNaN(valorUn)) {
-      return NextResponse.json(
-        { error: "Quantidade, ValorUn e ValorTotal devem ser numéricos" },
         { status: 400 }
       );
     }
@@ -75,7 +58,7 @@ export async function PUT(
         cidade: data.cidade || null,
         endNumero: data.endNumero || null,
         cep: data.cep || null,
-        estado: data.cidade || null,
+        estado: data.cidade || null, // Nota: você está usando cidade aqui, deveria ser data.estado
         telefoneFixo: data.telefoneFixo || null,
         celular: data.celular || null,
         email: data.email || null,

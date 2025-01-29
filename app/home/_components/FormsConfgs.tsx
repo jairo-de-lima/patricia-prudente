@@ -8,15 +8,6 @@ export const formConfigs = {
       label: "Data de Cadastro",
       type: "text",
       required: true,
-      mask: "99/99/9999", // Máscara para data no formato dd/mm/aaaa
-      defaultValue: new Date()
-        .toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          timeZone: "UTC",
-        })
-        .replace(/(\d+)\/(\d+)\/(\d+)/, "$2/$1/$3"),
     },
     fields: {
       leftColumn: [
@@ -31,14 +22,14 @@ export const formConfigs = {
           label: "CNPJ",
           type: "text",
           required: true,
-          mask: "99.999.999/9999-99",
+          mask: "cnpj",
         },
         {
           id: "ie",
           label: "IE",
           type: "text",
           required: true,
-          mask: "999.999.999.999",
+          mask: "ie",
         },
         {
           id: "endereco",
@@ -61,7 +52,7 @@ export const formConfigs = {
               label: "CEP",
               type: "text",
               required: true,
-              mask: "99999-999",
+              mask: "cep",
             },
           ],
         },
@@ -84,7 +75,7 @@ export const formConfigs = {
               type: "tel",
               required: false,
               prefix: "(11)",
-              mask: "(99) 99999-9999",
+              mask: "tel",
             },
             {
               id: "celular",
@@ -92,7 +83,7 @@ export const formConfigs = {
               type: "tel",
               required: true,
               prefix: "(11)",
-              mask: "(99) 99999-9999",
+              mask: "tel",
             },
           ],
         },
@@ -114,7 +105,7 @@ export const formConfigs = {
           label: "Suframa",
           type: "text",
           require: false,
-          mask: "99999999",
+          mask: "suframa",
         },
         { id: "transp", label: "Transportadora", type: "text" },
         {
@@ -122,7 +113,7 @@ export const formConfigs = {
           label: "Telefone",
           type: "tel",
           prefix: "(11)",
-          mask: "(99) 9999-9999",
+          mask: "tel",
         },
       ],
     },

@@ -111,16 +111,10 @@ const RegistrationForm = ({ initialData = {} }) => {
                   config={config}
                   initialData={initialData}
                   clientCod={{ codigo: codigo }}
+                  onSubmit={handleSubmit} // Passando a função
                 />
               </motion.div>
             </AnimatePresence>
-
-            <div className="flex items-center justify-center gap-4">
-              <Button variant="outline" type="reset">
-                Limpar
-              </Button>
-              <Button type="submit">Cadastrar</Button>
-            </div>
           </form>
         </CardContent>
       </Card>
