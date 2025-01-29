@@ -39,18 +39,19 @@ export const EntityCard = ({
 
       {/* Conteúdo principal */}
       <div className="space-y-2" onClick={onClick}>
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-500">
-            Código: {entity.codigo}
-          </span>
-          <span className="text-sm text-gray-500">
-            {format(new Date(entity.dataCad), "dd/MM/yyyy")}
-          </span>
+        <div className="grid grid-cols-2 items-center justify-between">
+          <h3 className="font-medium text-gray-900">{entity.razaoSocial}</h3>
+          <div className="flex flex-col items-center">
+            <span className="text-sm text-gray-500">
+              Criado:{format(new Date(entity.dataCad), "dd/MM/yyyy")}
+            </span>
+            <span className="text-sm font-medium text-gray-500">
+              Código: {entity.codigo}
+            </span>
+          </div>
         </div>
 
-        <h3 className="font-medium text-gray-900">{entity.razaoSocial}</h3>
-
-        <div className="grid grid-cols-2 gap-2 text-sm text-gray-500">
+        <div className="flex flex-col gap-2 text-sm text-gray-500">
           <div>CNPJ: {entity.cnpj}</div>
           <div>IE: {entity.ie}</div>
         </div>

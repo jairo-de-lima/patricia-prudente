@@ -53,18 +53,20 @@ export async function PUT(
         dataCad: new Date(data.dataCad),
         ie: data.ie,
         razaoSocial: data.razaoSocial,
+        codigo: data.codigo || null,
         cnpj: data.cnpj,
         endereco: data.endereco || null,
         cidade: data.cidade || null,
         endNumero: data.endNumero || null,
         cep: data.cep || null,
-        estado: data.cidade || null, // Nota: você está usando cidade aqui, deveria ser data.estado
+        estado: data.estado || null,
         telefoneFixo: data.telefoneFixo || null,
         celular: data.celular || null,
         email: data.email || null,
         emailFina: data.emailFina || null,
         obs: data.obs || null,
         NumeroNF: data.NumeroNF || null,
+        bairro: data.bairro || null,
       },
     });
 

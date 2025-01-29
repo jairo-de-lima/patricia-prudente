@@ -11,7 +11,7 @@ import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
 import { ScrollArea } from "@/app/_components/ui/scroll-area";
-import { Cliente, Fornecedor, Transportadora } from "./types";
+import { Cliente, Fornecedor, Transportadora } from "@/app/types";
 import { applyMask } from "@/app/_components/ApplyMask";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -24,20 +24,30 @@ interface EntityEditFormProps<T> {
 }
 
 const fieldLabels: Record<string, string> = {
+  dataCad: "Cadastrado",
   razaoSocial: "Razão Social",
+  ie: "I.E",
   codigo: "Código",
   cnpj: "CNPJ",
   inscricaoEstadual: "Inscrição Estadual",
   endereco: "Endereço",
   cidade: "Cidade",
+  bairro: "Bairro",
   estado: "Estado",
   cep: "CEP",
+  telefoneFixo: "Telefone Fixo",
+  endNumero: "Nº",
   telefone: "Telefone",
   celular: "Celular",
   email: "E-mail",
-  emailFinanceiro: "E-mail Financeiro",
-  emailComercial: "E-mail Comercial",
+  emailFin: "E-mail Financeiro",
+  emailFina: "E-mail Financeiro",
+  suframa: "Suframa",
   observacoes: "Observações",
+  transp: "Transportadora",
+  tel: "Telefone",
+  dataRecebimento: "Data de Recebimento",
+  obs: "Observações",
 };
 
 export const EntityEditForm = <
@@ -65,6 +75,12 @@ export const EntityEditForm = <
       maskedValue = applyMask(value, "tel");
     } else if (name === "cep") {
       maskedValue = applyMask(value, "cep");
+    } else if (name === "suframa") {
+      maskedValue = applyMask(value, "suframa");
+    } else if (name === "comissao") {
+      maskedValue = applyMask(value, "comissao");
+    } else if (name === "ie") {
+      maskedValue = applyMask(value, "ie");
     }
     setFormData((prev) => ({
       ...prev,
@@ -81,6 +97,8 @@ export const EntityEditForm = <
     if (key.includes("email")) return "email";
     if (key.includes("telefone") || key.includes("celular")) return "tel";
     if (key.includes("cnpj")) return "text";
+    if (key.includes("dataCad") || key.includes("dataRecebimento"))
+      return "date";
     if (typeof value === "number") return "number";
     return "text";
   };
@@ -109,7 +127,9 @@ export const EntityEditForm = <
                 if (
                   key === "id" ||
                   key === "createdAt" ||
-                  key === "updatedAt"
+                  key === "updatedAt" ||
+                  key === "clienteId" ||
+                  key === "fornecedorId"
                 ) {
                   return null;
                 }
