@@ -2,7 +2,7 @@
 export const formConfigs = {
   cliente: {
     title: "Cadastro de Cliente",
-    clientLabel: "Código do Cliente",
+    codLabel: "Código do Cliente",
     dataCad: {
       id: "dataCad",
       label: "Data de Cadastro",
@@ -106,14 +106,6 @@ export const formConfigs = {
           type: "text",
           require: false,
           mask: "suframa",
-        },
-        { id: "transp", label: "Transportadora", type: "text" },
-        {
-          id: "tel",
-          label: "Telefone",
-          type: "tel",
-          prefix: "(11)",
-          mask: "tel",
         },
       ],
     },

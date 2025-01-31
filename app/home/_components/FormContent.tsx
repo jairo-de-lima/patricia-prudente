@@ -6,12 +6,18 @@ import { Label } from "@/app/_components/ui/label";
 import { FormConfig } from "./types";
 import { useState } from "react";
 import { Button } from "@/app/_components/ui/button";
+import TransportadoraSection from "./TransportadoraSection";
 
 type FormContentProps = {
   config: FormConfig;
   initialData?: Record<string, string>;
   clientCod: { codigo: string };
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onTransportadoraChange: (data: {
+    razaoSocial: string;
+    telefone: string;
+  }) => void;
+  reset?: boolean;
 };
 
 const FormContent = ({
@@ -19,12 +25,24 @@ const FormContent = ({
   initialData,
   clientCod,
   onSubmit,
+  onTransportadoraChange,
 }: FormContentProps) => {
   const [reset, setReset] = useState(false);
 
   const handleReset = () => {
     setReset(true);
     setTimeout(() => setReset(false), 0);
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Evita recarregar a página
+
+    try {
+      onSubmit(event); // Aguarda o envio dos dados
+      handleReset(); // Reseta o formulário somente após sucesso
+    } catch (error) {
+      console.error("Erro ao enviar o formulário:", error);
+    }
   };
 
   const renderFields = (field: any) => {
@@ -62,97 +80,99 @@ const FormContent = ({
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
-      {/* Header com título e data */}
-      <div className="flex items-center justify-between pt-4">
-        <h1 className="text-xl font-semibold">{config.title}</h1>
-        {config.dataCad && (
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex items-center justify-between pt-4">
+          <h1 className="text-xl font-semibold">{config.title}</h1>
+          {config.dataCad && (
+            <div className="flex items-center gap-2">
+              <Label>DATA CAD:</Label>
+              <Input
+                type="date"
+                className="w-36"
+                name="dataCad"
+                defaultValue={initialData?.dataCad || ""}
+              />
+            </div>
+          )}
+        </div>
+
+        {config.codLabel && (
           <div className="flex items-center gap-2">
-            <Label>DATA CAD:</Label>
+            <Label htmlFor="codigo">{config.codLabel}:</Label>
             <Input
-              type="date"
-              className="w-36"
-              name="dataCad"
-              defaultValue={initialData?.dataCad || ""}
+              id="codigo"
+              name="codigo"
+              value={clientCod.codigo}
+              disabled
+              className="w-14"
             />
           </div>
         )}
-      </div>
 
-      {/* Campo de código se existir */}
-      {config.codLabel && (
-        <div className="flex items-center gap-2">
-          <Label htmlFor="codigo">{config.codLabel}:</Label>
-          <Input
-            id="codigo"
-            name="codigo"
-            value={clientCod.codigo}
-            disabled
-            className="w-14"
-          />
-        </div>
-      )}
-
-      {config.clientLabel && (
-        <div className="flex items-center gap-2">
-          <Label htmlFor="codigo">{config.clientLabel}:</Label>
-          <Input
-            id="codigo"
-            name="codigo"
-            value={clientCod.codigo}
-            disabled
-            className="w-14"
-          />
-        </div>
-      )}
-
-      {/* Campos do formulário */}
-      <div className="space-y-4">
-        <motion.div
-          className="space-y-4"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          {config.fields.leftColumn.map(renderFields)}
-        </motion.div>
-
-        {config.fields.extras && (
-          <motion.div
-            className="mt-4 flex items-center gap-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            {config.fields.extras.map(renderFields)}
-          </motion.div>
+        {config.clientLabel && (
+          <div className="flex items-center gap-2">
+            <Label htmlFor="codigo">{config.clientLabel}:</Label>
+            <Input
+              id="codigo"
+              name="codigo"
+              value={clientCod.codigo}
+              disabled
+              className="w-14"
+            />
+          </div>
         )}
 
-        {config.fields.obs && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <FormField
-              field={{
-                id: "obs",
-                label: "OBS",
-                type: "text",
-                required: false,
-                prefix: "",
-                value: "",
-              }}
-              defaultValue={initialData?.obs}
+        <div className="space-y-4">
+          <motion.div
+            className="space-y-4"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            {config.fields.leftColumn.map(renderFields)}
+          </motion.div>
+
+          {config.fields.extras && (
+            <motion.div
+              className="mt-4 flex items-center gap-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              {config.fields.extras.map(renderFields)}
+            </motion.div>
+          )}
+
+          {config.fields.obs && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <FormField
+                field={{
+                  id: "obs",
+                  label: "OBS",
+                  type: "text",
+                  required: false,
+                  prefix: "",
+                  value: "",
+                }}
+                defaultValue={initialData?.obs}
+                reset={reset}
+              />
+            </motion.div>
+          )}
+          {config.title === "Cadastro de Cliente" && (
+            <TransportadoraSection
+              onTransportadoraChange={onTransportadoraChange}
               reset={reset}
             />
-          </motion.div>
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* Botões de ação */}
-      <div className="flex items-center justify-center gap-4">
-        <Button variant="outline" type="reset" onClick={handleReset}>
-          Limpar
-        </Button>
-        <Button type="submit" onClick={handleReset}>
-          Cadastrar
-        </Button>
-      </div>
+        <div className="flex items-center justify-center gap-4">
+          <Button variant="outline" type="reset" onClick={handleReset}>
+            Limpar
+          </Button>
+          <Button type="submit">Cadastrar</Button>
+        </div>
+      </form>
     </motion.div>
   );
 };

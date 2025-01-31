@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card, CardContent, CardHeader } from "@/app/_components/ui/card";
-import { Button } from "@/app/_components/ui/button";
 import { useToast } from "@/app/_hooks/use-toast";
 import { createRegistration } from "@/app/_lib/actions";
 import FormHeader from "./FormHeader";
@@ -18,9 +17,15 @@ const formVariants = {
 };
 
 const RegistrationForm = ({ initialData = {} }) => {
-  const [formType, setFormType] = useState("cliente");
+  const [formType, setFormType] = useState<
+    "cliente" | "fornecedor" | "transportadora"
+  >("cliente");
   const [codigo, setCodigo] = useState("");
   const { toast } = useToast();
+  const [transportadoraData, setTransportadoraData] = useState({
+    razaoSocial: "",
+    telefone: "",
+  });
   const config = formConfigs[formType];
 
   const fetchCodigo = async () => {
@@ -54,7 +59,35 @@ const RegistrationForm = ({ initialData = {} }) => {
   };
 
   useEffect(() => {
-    console.log("Fetching código para o tipo:", formType); // Verificar se formType está sendo alterado
+    const fetchCodigo = async () => {
+      try {
+        // Criando um mapeamento para os valores corretos dos endpoints
+        const endpointMapping = {
+          cliente: "clientes", // 'cliente' mapeado para 'clientes'
+          fornecedor: "fornecedores", // 'fornecedor' mapeado para 'fornecedores'
+          transportadora: "transportadora", // 'transportadora' já está correto
+        };
+
+        // Usando o mapeamento para garantir o endpoint correto
+        const endpoint = endpointMapping[formType];
+
+        if (!endpoint) {
+          throw new Error("Tipo de cadastro inválido");
+        }
+
+        // Fazendo a requisição com o endpoint correto
+        const response = await fetch(`/api/${endpoint}/count`);
+
+        if (!response.ok) {
+          throw new Error("Erro ao buscar o código");
+        }
+
+        const data = await response.json();
+        setCodigo((data + 1).toString()); // Define o próximo código
+      } catch (error) {
+        console.error("Erro ao buscar o código:", error);
+      }
+    };
     fetchCodigo();
   }, [formType]);
 
@@ -86,6 +119,12 @@ const RegistrationForm = ({ initialData = {} }) => {
         type: formType,
         ...data,
         codigo,
+        ...(formType === "cliente"
+          ? {
+              transp: transportadoraData.razaoSocial, // razãoSocial vai para 'transp'
+              tel: transportadoraData.telefone, // telefone vai para 'tel'
+            }
+          : {}),
       };
       await createRegistration(dataToSend);
       e.target.reset();
@@ -104,6 +143,15 @@ const RegistrationForm = ({ initialData = {} }) => {
     }
     fetchCodigo();
   };
+  const handleTransportadoraChange = (data: {
+    razaoSocial: string;
+    telefone: string;
+  }) => {
+    setTransportadoraData((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
 
   return (
     <motion.div
@@ -118,25 +166,24 @@ const RegistrationForm = ({ initialData = {} }) => {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={formType}
-                variants={formVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.3 }}
-              >
-                <FormContent
-                  config={config}
-                  initialData={initialData}
-                  clientCod={{ codigo: codigo }}
-                  onSubmit={handleSubmit} // Passando a função
-                />
-              </motion.div>
-            </AnimatePresence>
-          </form>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={formType}
+              variants={formVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+            >
+              <FormContent
+                config={config}
+                initialData={initialData}
+                clientCod={{ codigo: codigo }}
+                onSubmit={handleSubmit} // Passando a função
+                onTransportadoraChange={handleTransportadoraChange} // Nova função
+              />
+            </motion.div>
+          </AnimatePresence>
         </CardContent>
       </Card>
     </motion.div>

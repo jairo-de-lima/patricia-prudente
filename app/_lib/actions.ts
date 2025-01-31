@@ -99,6 +99,7 @@ export async function createRegistration(data: any) {
             emailFin: data.emailFin,
             suframa: data.suframa || null,
             transp: data.transp || null,
+            tel: data.tel || null,
             NumeroNF: data.NumeroNF || null,
           },
         });
@@ -121,9 +122,6 @@ export async function createRegistration(data: any) {
             endereco: data.endereco,
             endNumero: data.endNumero,
             cep: data.cep,
-            cidade: data.cidade || null,
-            estado: data.estado || null,
-            bairro: data.bairro || null,
             telefoneFixo: data.telefoneFixo || null,
             celular: data.celular || null,
             emailPedido: data.emailPedido || null,
@@ -134,6 +132,9 @@ export async function createRegistration(data: any) {
               : null,
             obs: data.obs || null,
             NumeroNF: data.NumeroNF || null,
+            cidade: data.cidade || null,
+            estado: data.estado || null,
+            bairro: data.bairro || null,
           },
         });
         break;

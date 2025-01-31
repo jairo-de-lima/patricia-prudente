@@ -71,14 +71,14 @@ export const generatePDF = async ({
   });
 
   // Date field
-  const formattedDate = format(selectedData[0].dataCad, "dd/MM/yyyy");
-  page.drawText(`DATA CAD: ${formattedDate}`, {
-    x: pageWidth - 150,
-    y: titleY,
-    size: 12,
-    font: fontRegular,
-    color: rgb(0.5, 0, 0.5),
-  });
+  // const formattedDate = format(selectedData[0].dataCad, "dd/MM/yyyy");
+  // page.drawText(`DATA CAD: ${formattedDate}`, {
+  //   x: pageWidth - 150,
+  //   y: titleY,
+  //   size: 10,
+  //   font: fontRegular,
+  //   color: rgb(0.5, 0, 0.5),
+  // });
 
   // Form fields
   let yPosition = titleY - 40;

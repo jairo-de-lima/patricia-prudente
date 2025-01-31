@@ -4,7 +4,7 @@ import FormSelector from "./FormSelector";
 
 type FormHeaderProps = {
   formType: string;
-  setFormType: (type: string) => void;
+  setFormType: (value: string) => void;
 };
 
 const FormHeader = ({ formType, setFormType }: FormHeaderProps) => (

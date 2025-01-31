@@ -11,7 +11,7 @@ import { Button } from "@/app/_components/ui/button";
 import { Input } from "@/app/_components/ui/input";
 import { Label } from "@/app/_components/ui/label";
 import { ScrollArea } from "@/app/_components/ui/scroll-area";
-import { Cliente, Fornecedor, Transportadora } from "@/app/types";
+import { Cliente, Fornecedor, Transportadora } from "./types";
 import { applyMask } from "@/app/_components/ApplyMask";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
