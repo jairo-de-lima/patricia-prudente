@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "../../database";
+import { addHours } from "date-fns";
+import { revalidatePath } from "next/cache";
 
 export async function GET(
   request: Request,
@@ -33,37 +35,30 @@ export async function PUT(
 ) {
   try {
     const data = await request.json();
-
-    // Validar se os campos obrigatórios estão presentes
-    if (!data.comissao || !data.dataRecebimento) {
-      return NextResponse.json(
-        { error: "Campos obrigatórios estão faltando" },
-        { status: 400 }
-      );
+    if (data.dataCad) {
+      data.dataCad = addHours(new Date(data.dataCad), 3); // Converte UTC para GMT-3
+    }
+    if (data.dataRecebimento) {
+      data.dataRecebimento = addHours(new Date(data.dataRecebimento), 3); // Converte UTC para GMT-3
     }
 
-    // Validar tipos de dados
-    const comissao = parseFloat(data.comissao);
-    const dataRecebimento = new Date(data.dataRecebimento);
+    // Verificar se o fornecedor existe antes de tentar atualizá-lo
+    const existingFornecedor = await prisma.fornecedor.findUnique({
+      where: { id: params.id },
+    });
 
-    if (isNaN(comissao) || isNaN(dataRecebimento.getTime())) {
+    if (!existingFornecedor) {
       return NextResponse.json(
-        {
-          error:
-            "Dados inválidos: comissao deve ser numérica e dataRecebimento deve ser uma data válida",
-        },
-        { status: 400 }
+        { error: "Fornecedor não encontrado para atualização" },
+        { status: 404 }
       );
     }
 
     const fornecedor = await prisma.fornecedor.update({
       where: { id: params.id },
-      data: {
-        ...data,
-        comissao,
-        dataRecebimento,
-      },
+      data: data,
     });
+    revalidatePath("/pdf-filter");
 
     return NextResponse.json(fornecedor, { status: 200 });
   } catch (error) {

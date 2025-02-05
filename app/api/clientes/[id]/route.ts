@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "../../database";
 import { revalidatePath } from "next/cache";
+import { addHours } from "date-fns";
 
 export async function GET(
   request: Request,
@@ -34,6 +35,12 @@ export async function PUT(
 ) {
   try {
     const data = await request.json();
+    if (data.dataCad) {
+      data.dataCad = addHours(new Date(data.dataCad), 3); // Converte UTC para GMT-3
+    }
+    if (data.dataRecebimento) {
+      data.dataRecebimento = addHours(new Date(data.dataRecebimento), 3); // Converte UTC para GMT-3
+    }
 
     // Verificar se o cliente existe antes de tentar atualizá-lo
     const existingCliente = await prisma.cliente.findUnique({

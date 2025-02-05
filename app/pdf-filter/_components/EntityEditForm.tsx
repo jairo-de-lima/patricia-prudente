@@ -15,6 +15,7 @@ import { Cliente, Fornecedor, Transportadora } from "./types";
 import { applyMask } from "@/app/_components/ApplyMask";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { formatInTimeZone } from "date-fns-tz";
 
 interface EntityEditFormProps<T> {
   entity: T;
@@ -63,8 +64,13 @@ export const EntityEditForm = <
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
+    let updatedValue = value;
     let maskedValue = value;
+
+    if (type === "date") {
+      updatedValue = new Date(value).toISOString(); // Converte para o formato ISO
+    }
 
     // Aplica a máscara dependendo do campo
     if (name === "cnpj") {
@@ -91,6 +97,7 @@ export const EntityEditForm = <
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
+    console.log("Form data:", formData);
   };
 
   const getFieldType = (key: string, value: any): string => {
@@ -141,9 +148,7 @@ export const EntityEditForm = <
 
                 // formata a data em formato ISO para o formato dd/MM/yyyy, HH:mm:ss
                 const formattedValue = isISODateString
-                  ? format(new Date(value), "dd/MM/yyyy, HH:mm:ss", {
-                      locale: ptBR,
-                    })
+                  ? format(new Date(value), "yyyy-MM-dd") // Ajustado para o formato do input type="date"
                   : value;
 
                 const label = fieldLabels[key] || key;

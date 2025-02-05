@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../database";
+import { addHours } from "date-fns";
 
 export async function GET(
   request: NextRequest,
@@ -35,6 +36,12 @@ export async function PUT(
 ) {
   try {
     const data = await request.json();
+    if (data.dataCad) {
+      data.dataCad = addHours(new Date(data.dataCad), 3); // Converte UTC para GMT-3
+    }
+    if (data.dataRecebimento) {
+      data.dataRecebimento = addHours(new Date(data.dataRecebimento), 3); // Converte UTC para GMT-3
+    }
 
     // Validação básica dos campos obrigatórios
     // Removidos os campos que não são usados na criação do registro
