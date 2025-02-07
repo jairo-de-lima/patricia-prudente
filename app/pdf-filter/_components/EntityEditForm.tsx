@@ -97,7 +97,6 @@ export const EntityEditForm = <
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
-    console.log("Form data:", formData);
   };
 
   const getFieldType = (key: string, value: any): string => {

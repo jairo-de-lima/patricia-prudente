@@ -243,14 +243,14 @@ export const formConfigs = {
           id: "cnpj",
           label: "CNPJ",
           type: "text",
-          required: true,
+          required: false,
           mask: "cnpj",
         },
         {
           id: "ie",
           label: "IE",
           type: "text",
-          required: true,
+          required: false,
           mask: "ie",
         },
         {

@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 // Validação de dados para Transportadora
 function validateTransportadoraData(data: any) {
   const errors: string[] = [];
-  const requiredFields = ["cnpj", "razaoSocial", "ie"];
+  const requiredFields = ["razaoSocial"];
 
   requiredFields.forEach((field) => {
     if (!data[field] || String(data[field]).trim() === "") {
@@ -20,14 +20,7 @@ function validateTransportadoraData(data: any) {
 // Validação de dados para Fornecedor
 function validateFornecedorData(data: any) {
   const errors: string[] = [];
-  const requiredFields = [
-    "razaoSocial",
-    "cnpj",
-    "endereco",
-    "ie",
-    "cep",
-    "emailFin",
-  ];
+  const requiredFields = ["razaoSocial", "cnpj", "ie"];
 
   requiredFields.forEach((field) => {
     if (!data[field] || String(data[field]).trim() === "") {
@@ -49,17 +42,7 @@ function validateFornecedorData(data: any) {
 // Validação de dados para Cliente
 function validateClienteData(data: any) {
   const errors: string[] = [];
-  const requiredFields = [
-    "razaoSocial",
-    "cnpj",
-    "ie",
-    "endereco",
-    "endNumero",
-    "cep",
-    "cidade",
-    "estado",
-    "emailFin",
-  ];
+  const requiredFields = ["razaoSocial", "cnpj", "ie"];
 
   requiredFields.forEach((field) => {
     if (!data[field] || String(data[field]).trim() === "") {
